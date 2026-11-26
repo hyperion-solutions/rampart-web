@@ -22,7 +22,8 @@ export function TopGainers({ gainers }: { gainers: readonly TopGainer[] }) {
           >
             <span className="row-span-2 grid place-items-center sm:row-span-1">
               {first ? (
-                <Image src="/icons/crown.png" alt="Top gainer" width={26} height={27} className="pixelated" />
+                // Served as the original PNG: re-encoding 26x27 pixel art to lossy WebP shifts its colours.
+                <Image src="/icons/crown.png" alt="Top gainer" width={26} height={27} unoptimized className="pixelated" />
               ) : (
                 <span className="font-pixel text-pixel-2x text-steel text-shadow-pixel">{i + 1}</span>
               )}
