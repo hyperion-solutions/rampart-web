@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+/* Palette pulled from the clan crest: storm-dark stone, steel trim, rune-blue lightning. */
+@theme {
+  --color-obsidian: #05070b;   /* page background */
+  --color-keep: #10151e;       /* panel fill */
+  --color-granite: #1e2733;    /* inset rows, header */
+  --color-mortar: #3a4656;     /* pixel borders */
+  --color-steel: #9aa4b1;      /* secondary text */
+  --color-limestone: #e4e7ec;  /* primary text */
+  --color-rune: #2f6bff;       /* primary accent */
+  --color-lightning: #8db4ff;  /* highlights, hover */
+  --color-banner: #a4473a;     /* red helm: sparing accent */
+  --color-brass: #ffd35c;      /* labels, ranks: OSRS yellow */
+  --color-gain: #3fff3f;       /* XP gains: OSRS green */
+
+  --font-body: var(--font-rs-plain), ui-monospace, monospace;
+  --font-pixel: var(--font-rs-bold), ui-monospace, monospace;
+  --font-quill: var(--font-rs-quill), ui-monospace, monospace;
+
+  /* Bitmap fonts: whole multiples of the native size only. */
+  --text-pixel: 16px;
+  --text-pixel--line-height: 1.25;
+  --text-pixel-2x: 32px;
+  --text-pixel-2x--line-height: 1.1;
+  --text-pixel-3x: 48px;
+  --text-pixel-3x--line-height: 1;
+}
+
+html { background: var(--color-obsidian); }
+body {
+  /* 4px dither, like an old dithered sky. */
+  background-color: var(--color-obsidian);
+  background-image: repeating-conic-gradient(#0b1018 0 25%, transparent 0 50%);
+  background-size: 8px 8px;
+  color: var(--color-limestone);
+  font-family: var(--font-body);
+  font-size: var(--text-pixel);
+  line-height: 1.4;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  font-smooth: never;
+}
+:focus-visible { outline: 4px solid var(--color-brass); outline-offset: 4px; }
+
+/* Storm glow behind the hero crest: the one soft effect on the site. */
+.storm {
+  background:
+    radial-gradient(circle at 50% 45%, rgb(47 107 255 / 0.35), transparent 60%),
+    radial-gradient(circle at 50% 45%, rgb(141 180 255 / 0.12), transparent 40%);
+}
+/* The crest has a flat black background: "lighten" lets the glow show through it. */
+.crest { mix-blend-mode: lighten; }
+
+/* Text with a hard 2px drop shadow, like OSRS interface text. */
+.text-shadow-pixel { text-shadow: 2px 2px 0 #000; }
+
+/* In the components layer so Tailwind utilities (mx-auto, bg-*) can override them. */
+@layer components {
+  /*
+   * Pixel box: notched corners + bevel, built from box-shadows so nothing is blurred.
+   * The four outer shadows draw the border with the corner pixels missing.
+   */
+  .pixel-box {
+    --edge: var(--color-mortar);
+    --hi: rgb(255 255 255 / 0.08);
+    --lo: rgb(0 0 0 / 0.45);
+    background: var(--color-keep);
+    margin: 4px;
+    box-shadow:
+      0 -4px 0 0 var(--edge), 0 4px 0 0 var(--edge),
+      -4px 0 0 0 var(--edge), 4px 0 0 0 var(--edge),
+      inset 4px 4px 0 0 var(--hi), inset -4px -4px 0 0 var(--lo);
+  }
+
+  /* Pixel button: same box, presses down on click. */
+  .pixel-btn {
+    --edge: #000;
+    --hi: rgb(255 255 255 / 0.25);
+    --lo: rgb(0 0 0 / 0.4);
+    display: inline-block;
+    margin: 4px;
+    padding: 10px 20px 14px;
+    font-family: var(--font-pixel);
+    font-size: var(--text-pixel);
+    box-shadow:
+      0 -4px 0 0 var(--edge), 0 4px 0 0 var(--edge),
+      -4px 0 0 0 var(--edge), 4px 0 0 0 var(--edge),
+      inset 4px 4px 0 0 var(--hi), inset -4px -4px 0 0 var(--lo);
+    text-shadow: 2px 2px 0 #000;
+  }
+  .pixel-btn:hover { filter: brightness(1.15); }
+  .pixel-btn:active {
+    padding: 12px 20px 12px;
+    box-shadow:
+      0 -4px 0 0 var(--edge), 0 4px 0 0 var(--edge),
+      -4px 0 0 0 var(--edge), 4px 0 0 0 var(--edge),
+      inset 4px 4px 0 0 var(--lo), inset -4px -4px 0 0 var(--hi);
+  }
+}

@@ -1,0 +1,20 @@
+name: Feature request
+description: Suggest something new for the site
+labels: [feature]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What should it do?
+      description: Describe it from a clan member's point of view.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is it useful?
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [landing, members, accounts, bingo, events, other]
