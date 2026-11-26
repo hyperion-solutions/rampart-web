@@ -1,0 +1,39 @@
+{
+  "type": "LOGOUT",
+  "playerName": "Example",
+  "accountType": "IRONMAN",
+  "dinkAccountHash": "0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+  "clanName": "Rampart",
+  "seasonalWorld": false,
+  "world": 301,
+  "worldTypes": [
+    "MEMBERS",
+    "SKILL_TOTAL"
+  ],
+  "discordUser": {
+    "id": "123456789012345678",
+    "name": "example",
+    "avatarHash": "00000000000000000000000000000000"
+  },
+  "embeds": [
+    {
+      "title": "Player Logout",
+      "description": "Example logged out",
+      "author": {
+        "name": "Example",
+        "icon_url": "https://oldschool.runescape.wiki/images/Ironman_chat_badge.png",
+        "url": "https://secure.runescape.com/m=hiscore_oldschool/hiscorepersonal?user1=Example"
+      },
+      "color": 15990936,
+      "thumbnail": {
+        "url": "https://oldschool.runescape.wiki/images/Prop_sword.png"
+      },
+      "fields": [],
+      "footer": {
+        "text": "Powered by Dink",
+        "icon_url": "https://github.com/pajlads/DinkPlugin/raw/master/icon.png"
+      },
+      "timestamp": "2026-11-26T23:01:07.322106Z"
+    }
+  ]
+}
