@@ -1,3 +1,5 @@
+import { site } from "@/shared/config/site";
+
 export function SiteFooter() {
   return (
     <footer className="mt-16 border-t-4 border-black bg-granite shadow-[0_-4px_0_0_var(--color-mortar)]">
@@ -8,7 +10,11 @@ export function SiteFooter() {
           <a href="https://wiseoldman.net" className="text-brass hover:text-limestone">
             Wise Old Man
           </a>
-          . Not affiliated with Jagex.
+          . Not affiliated with Jagex.{" "}
+          <a href={site.discordInviteUrl} target="_blank" rel="noopener noreferrer" className="text-brass hover:text-limestone">
+            Join our Discord
+          </a>
+          .
         </p>
       </div>
     </footer>

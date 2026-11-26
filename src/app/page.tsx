@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { container } from "@/composition/container";
+import { site } from "@/shared/config/site";
 import { formatNumber, formatXp } from "@/shared/lib/format";
 import { SectionHeading } from "@/shared/ui/section-heading";
 import { Stat } from "@/shared/ui/stat";
@@ -8,9 +9,24 @@ import { Stat } from "@/shared/ui/stat";
 export const revalidate = 300;
 
 const pillars = [
-  { title: "Ironman only", body: "Every member plays an ironman. No trading, no handouts, everything earned." },
-  { title: "Defence capped at 45", body: "We build pures with staying power: 1 to 45 Defence, and it stays there." },
-  { title: "Hold the wall together", body: "Raids, bossing, skilling nights and clan events. Nobody climbs alone." },
+  {
+    title: "1-45 Defence ironmen",
+    body: "Every member is an ironman with Defence at 45 or below. No trading, no handouts: every drop is earned.",
+  },
+  {
+    title: "You name it, we do it",
+    body: "PvM, PvP, raids, wilderness bossing and bingo. There is always a team heading out.",
+  },
+  {
+    title: "Have fun, get the drops",
+    body: "Keep it friendly and keep it clean: no illegal sites and no service Discords.",
+  },
+] as const;
+
+const joinSteps = [
+  { title: "Join the Discord", body: "Use the invite below to join the Rampart server." },
+  { title: "Get full access", body: "React with the green check in the welcome channel, then set your display name to your in-game name." },
+  { title: "Pick your roles", body: "Choose roles like @Raiders to get pinged for raids, wilderness bossing and group PvM." },
 ] as const;
 
 const comingSoon = [
@@ -46,12 +62,12 @@ export default async function HomePage() {
           {clan.description ?? "An Old School RuneScape clan for 1-45 Defence ironmen. Hold the wall. Level up together."}
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
-          <Link href="/members" className="pixel-btn bg-rune text-white">
+          <a href={site.discordInviteUrl} target="_blank" rel="noopener noreferrer" className="pixel-btn bg-rune text-white">
+            Join the Discord
+          </a>
+          <Link href="/members" className="pixel-btn bg-granite text-brass">
             Meet the members
           </Link>
-          <a href="#gains" className="pixel-btn bg-granite text-brass">
-            See this week&apos;s gains
-          </a>
         </div>
         <dl className="mx-auto mt-12 grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-4">
           <Stat label="Members" value={formatNumber(clan.members.length)} />
@@ -70,6 +86,26 @@ export default async function HomePage() {
               <p className="mt-2 text-steel text-shadow-pixel">{p.body}</p>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section id="join" className="scroll-mt-24">
+        <SectionHeading eyebrow="New here?" title="How to join" />
+        <ol className="grid gap-4 md:grid-cols-3">
+          {joinSteps.map((step, i) => (
+            <li key={step.title} className="pixel-box flex gap-4 p-5">
+              <span className="w-6 shrink-0 font-pixel text-pixel-2x text-lightning text-shadow-pixel">{i + 1}</span>
+              <div>
+                <h3 className="font-pixel text-pixel text-brass text-shadow-pixel">{step.title}</h3>
+                <p className="mt-2 text-steel text-shadow-pixel">{step.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-6 text-center">
+          <a href={site.discordInviteUrl} target="_blank" rel="noopener noreferrer" className="pixel-btn bg-rune text-white">
+            Join the Discord
+          </a>
         </div>
       </section>
 
