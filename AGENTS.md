@@ -61,6 +61,12 @@ Utilities: `.pixel-box` (notched, bevelled panel), `.pixel-btn` (button that pre
 ## Decisions
 Significant choices are recorded in `docs/decisions/NNNN-title.md` (context, decision, consequences). Read them before changing related code, and add one when making a new significant choice.
 
+## Database
+- Postgres (Neon) through Drizzle ORM. Each module keeps its tables in `modules/<name>/infrastructure/db/schema.ts` and builds its Drizzle client there from `shared/db/connection.ts`.
+- Never edit applied migrations. Change the schema, run `npm run db:generate`, commit the new file in `drizzle/`, and test it with `npm run db:migrate` against your development branch.
+- Production deploys apply migrations automatically (`scripts/vercel-build.sh`). Keep migrations backwards compatible: the previous deploy keeps serving until the new one is live, and preview deploys share the production database without migrating it.
+- Domain and application code never import Drizzle or the schema; repositories map rows to domain types.
+
 ## Accounts (v0.2)
 - The `accounts` module owns users, linked accounts and link tokens. Pages and route handlers call its use cases; only its infrastructure talks to the database.
 - Never store raw link tokens, passwords, emails or full Dink payloads. Store token hashes only.
