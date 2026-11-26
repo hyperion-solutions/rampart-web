@@ -1,4 +1,5 @@
 import "server-only";
+import { GetClanRoster } from "@/modules/clan/application/get-clan-roster";
 import { GetClanOverview } from "@/modules/clan/application/get-clan-overview";
 import { GetTopGainers } from "@/modules/clan/application/get-top-gainers";
 import { WomClanRepository } from "@/modules/clan/infrastructure/wiseoldman/wom-clan-repository";
@@ -12,6 +13,7 @@ export function createContainer() {
   return {
     getClanOverview: new GetClanOverview(clanRepository),
     getTopGainers: new GetTopGainers(clanRepository),
+    getClanRoster: new GetClanRoster(clanRepository),
   };
 }
 export const container = createContainer();

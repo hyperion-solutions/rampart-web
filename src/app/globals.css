@@ -98,3 +98,6 @@ body {
       inset 4px 4px 0 0 var(--lo), inset -4px -4px 0 0 var(--hi);
   }
 }
+
+/* Pixel-art icons (e.g. Wise Old Man rank icons): scale by whole multiples only. */
+.pixelated { image-rendering: pixelated; }
