@@ -10,8 +10,16 @@ export interface Clan {
   readonly rankOrder: readonly MemberRole[];
 }
 
+/** XP a player gained in a period, as reported by the data source. */
 export interface Gainer {
+  readonly playerId: number;
   readonly displayName: string;
+  readonly gained: number;
+}
+
+/** A gainer matched to their clan membership, so the UI can show rank, icons and total XP. */
+export interface TopGainer {
+  readonly member: Member;
   readonly gained: number;
 }
 

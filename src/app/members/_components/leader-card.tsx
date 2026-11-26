@@ -1,7 +1,7 @@
 import type { Member } from "@/modules/clan/domain/member";
 import { formatDate, formatLabel, formatRelative, formatXp } from "@/shared/lib/format";
-import { ACCOUNT_TYPE_LABELS, BUILD_LABELS } from "./labels";
-import { AccountTypeIcon, RankIcon } from "./member-icons";
+import { ACCOUNT_TYPE_LABELS, BUILD_LABELS } from "@/app/_components/labels";
+import { AccountTypeIcon, RankIcon } from "@/app/_components/member-icons";
 
 export function LeaderCard({ member, highlight = false }: { member: Member; highlight?: boolean }) {
   const stats = [

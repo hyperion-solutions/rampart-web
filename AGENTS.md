@@ -15,6 +15,7 @@ Organised by feature module, then by layer:
 
     src/
       app/            Next.js routes only: compose UI, call use cases. No business logic.
+        _components/    Feature UI shared by several routes (e.g. member icons). Route-only UI goes in <route>/_components/.
       composition/    Composition root (DI). The only place concrete classes are wired up.
       modules/<name>/
         domain/          Entities, value types, repository interfaces (ports). No framework or HTTP imports.
