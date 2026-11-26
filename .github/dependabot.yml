@@ -9,6 +9,11 @@ updates:
       minor-and-patch:
         update-types: [minor, patch]
     labels: [chore, dependencies]
+    ignore:
+      # Major upgrades (Next, TypeScript, ESLint, React) need planned migrations:
+      # track them as issues instead of automatic PRs.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
