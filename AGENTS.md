@@ -64,7 +64,7 @@ Significant choices are recorded in `docs/decisions/NNNN-title.md` (context, dec
 ## Database
 - Postgres (Neon) through Drizzle ORM. Each module keeps its tables in `modules/<name>/infrastructure/db/schema.ts` and builds its Drizzle client there from `shared/db/connection.ts`.
 - Never edit applied migrations. Change the schema, run `npm run db:generate`, commit the new file in `drizzle/`, and test it with `npm run db:migrate` against your development branch.
-- Production deploys apply migrations automatically (`scripts/vercel-build.sh`). Keep migrations backwards compatible: the previous deploy keeps serving until the new one is live, and preview deploys share the production database without migrating it.
+- Every Vercel deploy applies migrations automatically (`scripts/vercel-build.sh`): previews on their own Neon branch, production on `main`. Keep migrations backwards compatible: the previous deploy keeps serving until the new one is live.
 - Domain and application code never import Drizzle or the schema; repositories map rows to domain types.
 
 ## Accounts (v0.2)
