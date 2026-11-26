@@ -29,5 +29,5 @@ export const toClan = (g: WomGroupDetails): Clan => ({
 });
 
 export const toGainer = (e: WomGainEntry): Gainer => ({
-  displayName: e.player.displayName, gained: e.data.gained,
+  playerId: e.player.id, displayName: e.player.displayName, gained: e.data.gained,
 });

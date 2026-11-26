@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { TopGainers } from "@/app/_components/top-gainers";
 import { container } from "@/composition/container";
-import { formatNumber, formatXp } from "@/shared/lib/format";
+import { formatNumber } from "@/shared/lib/format";
 import { DiscordButton } from "@/shared/ui/discord-button";
 import { SectionHeading } from "@/shared/ui/section-heading";
 import { Stat } from "@/shared/ui/stat";
@@ -112,17 +113,7 @@ export default async function HomePage() {
             No gains tracked yet. Update members on Wise Old Man to see them here.
           </p>
         ) : (
-          <ol className="pixel-box divide-y-4 divide-obsidian">
-            {gainers.map((g, i) => (
-              <li key={g.displayName} className="flex items-center gap-4 px-5 py-3">
-                <span className={`w-10 font-pixel text-pixel-2x text-shadow-pixel ${i === 0 ? "text-brass" : "text-steel"}`}>
-                  {i + 1}
-                </span>
-                <span className="flex-1 font-pixel text-pixel text-limestone text-shadow-pixel">{g.displayName}</span>
-                <span className="font-pixel text-pixel text-gain text-shadow-pixel">+{formatXp(g.gained)} xp</span>
-              </li>
-            ))}
-          </ol>
+          <TopGainers gainers={gainers} />
         )}
       </section>
 

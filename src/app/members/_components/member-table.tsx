@@ -1,7 +1,7 @@
 import type { Member } from "@/modules/clan/domain/member";
 import { formatDate, formatLabel, formatNumber, formatRelative, formatXp } from "@/shared/lib/format";
-import { BUILD_LABELS } from "./labels";
-import { AccountTypeIcon, RankIcon } from "./member-icons";
+import { BUILD_LABELS } from "@/app/_components/labels";
+import { AccountTypeIcon, RankIcon } from "@/app/_components/member-icons";
 
 export function MemberTable({ members }: { members: readonly Member[] }) {
   return (
