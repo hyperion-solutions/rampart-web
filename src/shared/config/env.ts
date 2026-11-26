@@ -10,4 +10,10 @@ export const env = {
   womUserAgent: process.env.WOM_USER_AGENT ?? "rampart-web",
   /** Pooled Postgres connection string, set by the Neon integration on Vercel. */
   get databaseUrl() { return required("DATABASE_URL"); },
+  /** Auth.js: signs session cookies. Same value in Production and Preview (see README). */
+  get authSecret() { return required("AUTH_SECRET"); },
+  get authDiscordId() { return required("AUTH_DISCORD_ID"); },
+  get authDiscordSecret() { return required("AUTH_DISCORD_SECRET"); },
+  /** Preview deploys only: production auth URL that relays Discord sign-ins back to the preview. */
+  authRedirectProxyUrl: process.env.AUTH_REDIRECT_PROXY_URL,
 };

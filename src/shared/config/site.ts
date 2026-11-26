@@ -4,4 +4,6 @@ export const site = {
   url: "https://rampart-web-alpha.vercel.app",
   /** Permanent invite to the Rampart Discord server. */
   discordInviteUrl: "https://discord.gg/j6kYFNjNaa",
+  /** Rampart Discord server id. Only its members can sign in. */
+  discordGuildId: "1523846871708340294",
 } as const;

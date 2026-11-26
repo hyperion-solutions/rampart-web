@@ -32,6 +32,14 @@ Production database values are marked sensitive in Vercel, so they can't be pull
 
 Change the schema in `src/modules/<module>/infrastructure/db/schema.ts`, then run `npm run db:generate` and commit the new file in `drizzle/`. `npm run db:studio` opens a browser view of the data.
 
+### Discord sign-in
+
+Members sign in with Discord (Auth.js). Only members of the Rampart Discord server get in.
+
+- **Discord app:** its OAuth2 redirects must include `http://localhost:3000/api/auth/callback/discord` and `https://rampart-web-alpha.vercel.app/api/auth/callback/discord`.
+- **Vercel variables:** `AUTH_DISCORD_ID`, `AUTH_DISCORD_SECRET` and `AUTH_SECRET` in all environments. Use the **same** `AUTH_SECRET` in Production and Preview.
+- **Previews:** preview URLs change per deploy and can't all be registered with Discord, so Preview also sets `AUTH_REDIRECT_PROXY_URL=https://rampart-web-alpha.vercel.app/api/auth`. Production relays the Discord callback back to the preview.
+
 Before opening a pull request:
 
 ```bash

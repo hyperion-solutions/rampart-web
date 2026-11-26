@@ -7,7 +7,8 @@ const links = [
   { href: "/members", label: "Members" },
 ];
 
-export function SiteHeader() {
+/** `actions` is rendered at the end of the nav (the layout passes the account menu). */
+export function SiteHeader({ actions }: { actions?: React.ReactNode }) {
   return (
     <header className="sticky top-0 z-20 border-b-4 border-black bg-granite shadow-[0_4px_0_0_var(--color-mortar)]">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-2">
@@ -32,7 +33,8 @@ export function SiteHeader() {
               {l.label}
             </Link>
           ))}
-          <DiscordButton label="Discord" className="ml-1 px-3 py-1.5" />
+          <DiscordButton label="Discord" labelClassName="hidden sm:inline" className="ml-1 px-3 py-1.5" />
+          {actions}
         </nav>
       </div>
     </header>
