@@ -17,6 +17,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
     Discord({
       clientId: env.authDiscordId,
       clientSecret: env.authDiscordSecret,
+      // Discord returns `iss=https://discord.com` on the callback (RFC 9207). Without this,
+      // Auth.js compares it to its placeholder issuer and rejects the sign-in.
+      issuer: "https://discord.com",
       // No email: we only need who they are and whether they're in the Rampart server.
       authorization: { params: { scope: "identify guilds.members.read" } },
     }),
