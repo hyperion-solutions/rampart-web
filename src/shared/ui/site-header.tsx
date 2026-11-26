@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { site } from "@/shared/config/site";
 
 const links = [
   { href: "/", label: "Clan" },
@@ -31,12 +32,14 @@ export function SiteHeader() {
               {l.label}
             </Link>
           ))}
-          <span
-            className="hidden px-2 py-1 font-pixel text-pixel text-steel/60 text-shadow-pixel sm:inline"
-            title="Account linking is coming soon"
+          <a
+            href={site.discordInviteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pixel-btn ml-1 bg-rune px-3 py-1.5 text-white"
           >
-            Link account (soon)
-          </span>
+            Discord
+          </a>
         </nav>
       </div>
     </header>
