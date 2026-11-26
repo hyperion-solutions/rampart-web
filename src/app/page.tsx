@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { container } from "@/composition/container";
-import { site } from "@/shared/config/site";
 import { formatNumber, formatXp } from "@/shared/lib/format";
+import { DiscordButton } from "@/shared/ui/discord-button";
 import { SectionHeading } from "@/shared/ui/section-heading";
 import { Stat } from "@/shared/ui/stat";
 
@@ -62,9 +62,7 @@ export default async function HomePage() {
           {clan.description ?? "An Old School RuneScape clan for 1-45 Defence ironmen. Hold the wall. Level up together."}
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
-          <a href={site.discordInviteUrl} target="_blank" rel="noopener noreferrer" className="pixel-btn bg-rune text-white">
-            Join the Discord
-          </a>
+          <DiscordButton />
           <Link href="/members" className="pixel-btn bg-granite text-brass">
             Meet the members
           </Link>
@@ -103,9 +101,7 @@ export default async function HomePage() {
           ))}
         </ol>
         <div className="mt-6 text-center">
-          <a href={site.discordInviteUrl} target="_blank" rel="noopener noreferrer" className="pixel-btn bg-rune text-white">
-            Join the Discord
-          </a>
+          <DiscordButton />
         </div>
       </section>
 

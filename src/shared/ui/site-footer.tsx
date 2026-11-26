@@ -1,4 +1,5 @@
 import { site } from "@/shared/config/site";
+import { DiscordIcon } from "@/shared/ui/discord-icon";
 
 export function SiteFooter() {
   return (
@@ -11,7 +12,8 @@ export function SiteFooter() {
             Wise Old Man
           </a>
           . Not affiliated with Jagex.{" "}
-          <a href={site.discordInviteUrl} target="_blank" rel="noopener noreferrer" className="text-brass hover:text-limestone">
+          <a href={site.discordInviteUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-brass hover:text-limestone">
+            <DiscordIcon className="size-4" />
             Join our Discord
           </a>
           .
