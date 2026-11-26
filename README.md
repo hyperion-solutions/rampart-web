@@ -2,6 +2,8 @@
 
 Website for **Rampart**, an Old School RuneScape clan for 1-45 Defence ironmen. Built with Next.js and powered by [Wise Old Man](https://wiseoldman.net).
 
+**Live site:** https://rampart-web-alpha.vercel.app
+
 ## Run it locally
 
 Requires Node 22 (see `.nvmrc`).
@@ -27,7 +29,7 @@ npm run typecheck && npm run lint && npm run build
 
 ## Deployment
 
-Hosted on Vercel. Environment variables (`WOM_GROUP_ID`, `WOM_API_BASE_URL`, `WOM_USER_AGENT`) are set in the Vercel project settings, never committed.
+Hosted on Vercel at https://rampart-web-alpha.vercel.app. Environment variables (`WOM_GROUP_ID`, `WOM_API_BASE_URL`, `WOM_USER_AGENT`) are set in the Vercel project settings, never committed.
 
 ## Architecture
 
