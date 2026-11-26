@@ -4,6 +4,7 @@ Guidance for AI coding agents (and humans) working on **rampart-web**, the websi
 
 ## Stack
 Next.js (App Router) · React 19 · TypeScript (strict) · Tailwind CSS v4. Data comes from the Wise Old Man (WOM) API v2.
+From v0.2: Postgres (Vercel Marketplace) with Drizzle ORM, and Auth.js with Discord sign-in. Members prove RSN ownership through the Dink RuneLite plugin. See `docs/decisions/0001-account-linking.md`.
 
 ## Commands
 - `npm run dev` start dev server
@@ -57,5 +58,13 @@ Fonts are the OSRS bitmap fonts in `src/shared/fonts/` (loaded once via `next/fo
 Only use `text-pixel` (16px), `text-pixel-2x` (32px) and `text-pixel-3x` (48px); other sizes blur bitmap fonts.
 Utilities: `.pixel-box` (notched, bevelled panel), `.pixel-btn` (button that presses in), `.text-shadow-pixel`, `.storm` (glow behind the crest), `.crest` (blends the crest's black background into the page). Use the full-quality crest `public/brand/rampart-crest.webp`; don't pixelate it.
 
+## Decisions
+Significant choices are recorded in `docs/decisions/NNNN-title.md` (context, decision, consequences). Read them before changing related code, and add one when making a new significant choice.
+
+## Accounts (v0.2)
+- The `accounts` module owns users, linked accounts and link tokens. Pages and route handlers call its use cases; only its infrastructure talks to the database.
+- Never store raw link tokens, passwords, emails or full Dink payloads. Store token hashes only.
+- Dink requests arrive at `/api/dink/[token]` as JSON or `multipart/form-data` (`payload_json`). Validate them before use.
+
 ## Out of scope for now
-Automated tests, authentication, Discord bot integration.
+Automated tests, Discord bot integration, our own RuneLite plugin (revisit in v0.3, #32).
