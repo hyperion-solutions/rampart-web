@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SessionProvider } from "@/app/_components/session-provider";
+import { UserMenu } from "@/app/_components/user-menu";
 import { site } from "@/shared/config/site";
 import { fontVariables } from "@/shared/fonts";
 import { SiteFooter } from "@/shared/ui/site-footer";
@@ -23,9 +25,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={fontVariables}>
       <body className="flex min-h-dvh flex-col">
-        <SiteHeader />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-10">{children}</main>
-        <SiteFooter />
+        <SessionProvider>
+          <SiteHeader actions={<UserMenu />} />
+          <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-10">{children}</main>
+          <SiteFooter />
+        </SessionProvider>
       </body>
     </html>
   );

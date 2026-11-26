@@ -4,7 +4,12 @@ import { GetClanOverview } from "@/modules/clan/application/get-clan-overview";
 import { GetTopGainers } from "@/modules/clan/application/get-top-gainers";
 import { WomClanRepository } from "@/modules/clan/infrastructure/wiseoldman/wom-clan-repository";
 import { WomClient } from "@/modules/clan/infrastructure/wiseoldman/wom-client";
+import { SignInWithDiscord } from "@/modules/accounts/application/sign-in-with-discord";
+import { getAccountsDb } from "@/modules/accounts/infrastructure/db/client";
+import { DrizzleUserRepository } from "@/modules/accounts/infrastructure/db/drizzle-user-repository";
+import { DiscordGuildMembership } from "@/modules/accounts/infrastructure/discord/discord-guild-membership";
 import { env } from "@/shared/config/env";
+import { site } from "@/shared/config/site";
 
 /** Composition root: the ONLY place concrete classes are wired to ports. */
 export function createContainer() {
@@ -14,6 +19,10 @@ export function createContainer() {
     getClanOverview: new GetClanOverview(clanRepository),
     getTopGainers: new GetTopGainers(clanRepository),
     getClanRoster: new GetClanRoster(clanRepository),
+    signInWithDiscord: new SignInWithDiscord(
+      new DiscordGuildMembership(site.discordGuildId),
+      new DrizzleUserRepository(getAccountsDb),
+    ),
   };
 }
 export const container = createContainer();

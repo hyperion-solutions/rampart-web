@@ -70,6 +70,7 @@ Significant choices are recorded in `docs/decisions/NNNN-title.md` (context, dec
 ## Accounts (v0.2)
 - The `accounts` module owns users, linked accounts and link tokens. Pages and route handlers call its use cases; only its infrastructure talks to the database.
 - Never store raw link tokens, passwords, emails or full Dink payloads. Store token hashes only.
+- Auth.js is wired in `src/composition/auth.ts` (Discord only, scope `identify guilds.members.read`, no email). Server code gets the session with `auth()`; `session.user.id` is our `users.id`. Keep public pages static: the header reads the session client-side (`UserMenu`).
 - Dink requests arrive at `/api/dink/[token]` as JSON or `multipart/form-data` (`payload_json`). Validate them before use.
 
 ## Out of scope for now
