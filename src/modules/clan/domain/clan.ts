@@ -1,4 +1,4 @@
-import type { Member } from "./member";
+import type { Member, MemberRole } from "./member";
 
 export interface Clan {
   readonly id: number;
@@ -6,6 +6,8 @@ export interface Clan {
   readonly description: string | null;
   readonly homeworld: number | null;
   readonly members: readonly Member[];
+  /** The clan's ranks from highest to lowest. */
+  readonly rankOrder: readonly MemberRole[];
 }
 
 export interface Gainer {
