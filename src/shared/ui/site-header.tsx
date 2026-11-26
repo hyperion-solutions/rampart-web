@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { site } from "@/shared/config/site";
+import { DiscordButton } from "@/shared/ui/discord-button";
 
 const links = [
   { href: "/", label: "Clan" },
@@ -32,14 +32,7 @@ export function SiteHeader() {
               {l.label}
             </Link>
           ))}
-          <a
-            href={site.discordInviteUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pixel-btn ml-1 bg-rune px-3 py-1.5 text-white"
-          >
-            Discord
-          </a>
+          <DiscordButton label="Discord" className="ml-1 px-3 py-1.5" />
         </nav>
       </div>
     </header>
