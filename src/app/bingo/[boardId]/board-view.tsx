@@ -144,6 +144,14 @@ const linkify = (note: string) =>
 const who = (name: string | null, rsn: string | null) =>
   name ? (rsn && rsn !== name ? `${name} (${rsn})` : name) : rsn ?? "A former member";
 
+/** Keeps typed amounts between 1 and what's left; an empty field stays empty while typing. */
+const clampAmount = (value: string, remaining: number) => {
+  if (value === "") return "";
+  const n = Math.floor(Number(value));
+  if (!Number.isFinite(n) || n < 1) return "1";
+  return String(Math.min(n, remaining));
+};
+
 const inputClass =
   "block w-full border-4 border-black bg-obsidian px-3 py-2 font-pixel text-pixel text-limestone outline-none focus:border-rune";
 
@@ -174,6 +182,7 @@ function TileDetails({
   const [obtained, setObtained] = useState(choices[0]?.value ?? "");
   const [itemId, setItemId] = useState(tile.items.length === 1 ? String(tile.items[0]?.id) : "");
   const [amount, setAmount] = useState("1");
+  const amountValid = tile.quantity === 1 || (Number(amount) >= 1 && Number(amount) <= remaining);
   const [note, setNote] = useState("");
 
   function run(action: () => Promise<{ ok: boolean; error?: string }>, after?: () => void) {
@@ -298,12 +307,16 @@ function TileDetails({
                       <span className="font-pixel text-pixel text-limestone text-shadow-pixel">How many</span>
                       <input
                         type="number"
+                        inputMode="numeric"
                         min={1}
                         max={remaining}
                         value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
+                        onChange={(e) => setAmount(clampAmount(e.target.value, remaining))}
                         className={`mt-1 ${inputClass}`}
                       />
+                      <span className="mt-1 block text-steel text-shadow-pixel">
+                        {remaining === 1 ? "Only 1 left to complete it." : `1 to ${remaining} (what's left to complete it).`}
+                      </span>
                     </label>
                   )}
                   <input
@@ -315,7 +328,7 @@ function TileDetails({
                   />
                   <button
                     type="button"
-                    disabled={pending}
+                    disabled={pending || !amountValid}
                     onClick={addDrop}
                     className="pixel-btn bg-gain text-obsidian [text-shadow:none] disabled:opacity-60"
                   >
