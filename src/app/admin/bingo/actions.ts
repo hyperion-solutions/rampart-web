@@ -96,6 +96,28 @@ export async function clearTileAction(boardId: string, row: number, col: number)
   return { ok: true };
 }
 
+export type BoardToolResult = { readonly ok: true; readonly message: string } | { readonly ok: false; readonly error: string };
+
+/** Fills the empty squares of a draft board with random items. */
+export async function fillBoardRandomlyAction(boardId: string): Promise<BoardToolResult> {
+  await requireAdmin(`/admin/bingo/${boardId}`);
+  const result = await container.bingo.fillBoardRandomly.execute(String(boardId));
+  if (!result.ok) return { ok: false, error: result.error };
+  revalidatePath(`/admin/bingo/${boardId}`);
+  const n = result.value;
+  return { ok: true, message: n === 0 ? "Every square is already filled." : `Filled ${n} square${n === 1 ? "" : "s"}.` };
+}
+
+/** Empties every square of a draft board. */
+export async function clearBoardAction(boardId: string): Promise<BoardToolResult> {
+  await requireAdmin(`/admin/bingo/${boardId}`);
+  const result = await container.bingo.clearBoard.execute(String(boardId));
+  if (!result.ok) return { ok: false, error: result.error };
+  revalidatePath(`/admin/bingo/${boardId}`);
+  const n = result.value;
+  return { ok: true, message: `Cleared ${n} square${n === 1 ? "" : "s"}.` };
+}
+
 export type TeamFormState = { readonly error: string } | null;
 
 export async function createTeamAction(_prev: TeamFormState, formData: FormData): Promise<TeamFormState> {

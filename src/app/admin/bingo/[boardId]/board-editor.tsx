@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { ItemIcon, ItemPicker, type PickedItem } from "@/app/_components/item-picker";
 import { clearTileAction, saveTileAction } from "../actions";
 
@@ -21,7 +21,11 @@ type ItemsById = Readonly<Record<number, PickedItem>>;
 const inputClass =
   "mt-1 block w-full border-4 border-black bg-obsidian px-3 py-2 font-pixel text-pixel text-limestone outline-none focus:border-rune";
 
-/** The admin's board editor: click a square, then fill it in the panel. */
+/**
+ * The admin's board editor: click a square, then fill it in the panel.
+ * Keyboard: Tab, Shift+Tab or the arrow keys move between squares (the panel follows), Enter jumps
+ * into the square's item search, Esc goes back to the square, and saving moves to the next square.
+ */
 export function BoardEditor({
   boardId,
   size,
@@ -38,6 +42,26 @@ export function BoardEditor({
   const [selected, setSelected] = useState<{ row: number; col: number } | null>(null);
   const byPosition = new Map(tiles.map((t) => [`${t.row}:${t.col}`, t]));
   const current = selected ? byPosition.get(`${selected.row}:${selected.col}`) : undefined;
+  const squares = useRef<(HTMLButtonElement | null)[]>([]);
+  const panel = useRef<HTMLDivElement>(null);
+
+  const focusSquare = (index: number) => squares.current[Math.max(0, Math.min(size * size - 1, index))]?.focus();
+  /** The first field (the item search), not the Close button above it. */
+  const focusPanel = () => panel.current?.querySelector<HTMLElement>("input:not([disabled])")?.focus();
+
+  function onSquareKey(e: React.KeyboardEvent, i: number) {
+    const moves: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -size, ArrowDown: size };
+    const move = moves[e.key];
+    if (move !== undefined) {
+      e.preventDefault();
+      focusSquare(i + move);
+    } else if (e.key === "Enter" && !readOnly) {
+      e.preventDefault();
+      setSelected({ row: Math.floor(i / size), col: i % size });
+      // The panel re-renders for the new square first.
+      requestAnimationFrame(focusPanel);
+    }
+  }
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
@@ -51,8 +75,13 @@ export function BoardEditor({
           return (
             <button
               key={i}
+              ref={(el) => {
+                squares.current[i] = el;
+              }}
               type="button"
               onClick={() => setSelected({ row, col })}
+              onFocus={() => setSelected({ row, col })}
+              onKeyDown={(e) => onSquareKey(e, i)}
               aria-label={tile ? `${tile.name}, ${tile.points} points` : `Empty square, row ${row + 1}, column ${col + 1}`}
               className={`flex aspect-square flex-col items-center justify-center gap-1 p-1 text-center ${
                 tile ? "bg-keep" : "bg-obsidian/60"
@@ -76,10 +105,18 @@ export function BoardEditor({
         })}
       </div>
 
-      <div className="pixel-box h-fit p-5">
+      <div
+        ref={panel}
+        className="pixel-box h-fit p-5"
+        onKeyDown={(e) => {
+          if (e.key === "Escape" && selected) focusSquare(selected.row * size + selected.col);
+        }}
+      >
         {selected ? (
           <TilePanel
-            key={`${selected.row}:${selected.col}`}
+            // Keyed by the square's saved content too, so the form reloads when the square changes
+            // underneath it (fill at random, clear the board, or another admin's save).
+            key={`${selected.row}:${selected.col}:${current ? JSON.stringify(current) : "empty"}`}
             boardId={boardId}
             row={selected.row}
             col={selected.col}
@@ -87,10 +124,13 @@ export function BoardEditor({
             items={items}
             readOnly={readOnly}
             onClose={() => setSelected(null)}
+            onSaved={() => focusSquare(selected.row * size + selected.col + 1)}
           />
         ) : (
           <p className="text-steel text-shadow-pixel">
-            {readOnly ? "This board is finished, so its squares can't change." : "Click a square to fill it."}
+            {readOnly
+              ? "This board is finished, so its squares can't change."
+              : "Click a square to fill it. With the keyboard: Tab or the arrow keys move between squares, Enter edits one, Esc goes back."}
           </p>
         )}
       </div>
@@ -106,6 +146,7 @@ function TilePanel({
   items,
   readOnly,
   onClose,
+  onSaved,
 }: {
   boardId: string;
   row: number;
@@ -114,6 +155,8 @@ function TilePanel({
   items: ItemsById;
   readOnly: boolean;
   onClose: () => void;
+  /** Called after a successful save: the editor moves to the next square. */
+  onSaved: () => void;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -152,7 +195,10 @@ function TilePanel({
         itemIds: picked.map((i) => i.id),
       });
       setMessage(result.ok ? { tone: "ok", text: "Saved." } : { tone: "warn", text: result.error });
-      if (result.ok) router.refresh();
+      if (result.ok) {
+        router.refresh();
+        onSaved();
+      }
     });
   }
 
