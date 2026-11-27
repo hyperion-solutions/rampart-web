@@ -7,7 +7,12 @@ declare module "next-auth" {
   }
 
   interface Session {
-    user: { id: string; rank?: string } & DefaultSession["user"];
+    user: {
+      id: string;
+      rank?: string;
+      /** 13x13 pixel-art icon for the rank, when one exists. */
+      rankIconUrl?: string;
+    } & DefaultSession["user"];
   }
 }
 

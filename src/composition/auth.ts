@@ -1,7 +1,9 @@
 import "server-only";
 import NextAuth from "next-auth";
 import Discord from "next-auth/providers/discord";
+import { womRankIconUrl } from "@/modules/clan/infrastructure/wiseoldman/wom-assets";
 import { env } from "@/shared/config/env";
+import { site } from "@/shared/config/site";
 import { container } from "./container";
 
 /** Ranks are checked again after this long, so losing a rank ends the session within a day. */
@@ -83,6 +85,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
     session({ session, token }) {
       if (typeof token.userId === "string") session.user.id = token.userId;
       session.user.rank = token.rank;
+      const icon = token.rank ? site.clanRankIcons[token.rank] : undefined;
+      session.user.rankIconUrl = icon ? womRankIconUrl(icon) : undefined;
       return session;
     },
   },
