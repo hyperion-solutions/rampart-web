@@ -64,6 +64,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
         return token;
       }
 
+      // The user may be gone (account deleted, or data reset): end the session instead of acting
+      // as someone who no longer exists. If the database can't be reached, keep the session.
+      if (typeof token.userId === "string") {
+        const exists = await container.checkUserExists.execute(token.userId).catch(() => true);
+        if (!exists) return null;
+      }
+
       if (Date.now() - (token.rankCheckedAt ?? 0) < RANK_RECHECK_MS) return token;
 
       // Older than a day: check the rank again. Without a usable Discord token, sign them out.

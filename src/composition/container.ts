@@ -11,6 +11,7 @@ import { ListMyClaims } from "@/modules/accounts/application/list-my-claims";
 import { ListPendingClaims } from "@/modules/accounts/application/list-pending-claims";
 import { SubmitLinkClaim } from "@/modules/accounts/application/submit-link-claim";
 import { DrizzleLinkClaimRepository } from "@/modules/accounts/infrastructure/db/drizzle-link-claim-repository";
+import { CheckUserExists } from "@/modules/accounts/application/check-user-exists";
 import { DeleteMyAccount } from "@/modules/accounts/application/delete-my-account";
 import { GetMyAccountsOverview } from "@/modules/accounts/application/get-my-accounts-overview";
 import { GetLinkToken } from "@/modules/accounts/application/get-link-token";
@@ -93,6 +94,7 @@ export function createContainer() {
     getItems: new GetItems(itemSearch),
     signInWithDiscord: new SignInWithDiscord(clanMembership, users),
     deleteMyAccount: new DeleteMyAccount(users),
+    checkUserExists: new CheckUserExists(users),
     checkClanMembership: new CheckClanMembership(clanMembership),
     createLinkToken: new CreateLinkToken(linkTokens),
     revokeLinkToken: new RevokeLinkToken(linkTokens),
