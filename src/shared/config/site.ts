@@ -2,6 +2,8 @@
 export const site = {
   /** Production address, used to build absolute URLs for social previews. */
   url: "https://rampart-web-alpha.vercel.app",
+  /** In-game clan name, as Dink reports it in `clanName`. */
+  clanName: "Rampart",
   /** Permanent invite to the Rampart Discord server. */
   discordInviteUrl: "https://discord.gg/j6kYFNjNaa",
   /** Rampart Discord server id. Only its members with a clan rank role can sign in. */
