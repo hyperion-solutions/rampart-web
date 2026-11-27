@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, isNotNull } from "drizzle-orm";
 import type { LinkedAccount, LinkedAccountChanges, NewLinkedAccount } from "../../domain/linked-account";
 import type { LinkedAccountRepository } from "../../domain/linked-account-repository";
 import type { AccountsDb } from "./client";
@@ -48,6 +48,14 @@ export class DrizzleLinkedAccountRepository implements LinkedAccountRepository {
       .where(eq(linkedAccounts.userId, userId))
       .orderBy(asc(linkedAccounts.createdAt));
     return rows.map(toLinkedAccount);
+  }
+
+  async listLinkedWomPlayerIds(): Promise<number[]> {
+    const rows = await this.db()
+      .select({ womPlayerId: linkedAccounts.womPlayerId })
+      .from(linkedAccounts)
+      .where(isNotNull(linkedAccounts.womPlayerId));
+    return rows.flatMap((r) => (r.womPlayerId === null ? [] : [r.womPlayerId]));
   }
 
   async create(account: NewLinkedAccount): Promise<LinkedAccount> {

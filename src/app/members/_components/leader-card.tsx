@@ -2,6 +2,7 @@ import type { Member } from "@/modules/clan/domain/member";
 import { formatDate, formatLabel, formatRelative, formatXp } from "@/shared/lib/format";
 import { ACCOUNT_TYPE_LABELS, BUILD_LABELS } from "@/app/_components/labels";
 import { AccountTypeIcon, RankIcon } from "@/app/_components/member-icons";
+import { VerifiedBadge } from "@/app/_components/verified-accounts";
 
 export function LeaderCard({ member, highlight = false }: { member: Member; highlight?: boolean }) {
   const stats = [
@@ -17,14 +18,17 @@ export function LeaderCard({ member, highlight = false }: { member: Member; high
           <AccountTypeIcon member={member} scale={3} />
         </div>
         <div className="min-w-0">
-          <a
-            href={member.profileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block truncate font-pixel text-pixel text-limestone text-shadow-pixel hover:text-lightning"
-          >
-            {member.displayName}
-          </a>
+          <div className="flex min-w-0 items-center gap-2">
+            <a
+              href={member.profileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="truncate font-pixel text-pixel text-limestone text-shadow-pixel hover:text-lightning"
+            >
+              {member.displayName}
+            </a>
+            <VerifiedBadge womPlayerId={member.id} />
+          </div>
           <p className="mt-1 flex items-center gap-2 font-pixel text-pixel text-brass text-shadow-pixel">
             <RankIcon member={member} />
             {formatLabel(member.role)}
