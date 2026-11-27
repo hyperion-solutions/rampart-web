@@ -28,9 +28,10 @@ export const site = {
   },
   /**
    * Rank role icons, copied from the Rampart Discord (64x64 PNGs in public/icons/ranks).
-   * Recruit has no icon in Discord. Bronze is still to be added (#39).
+   * Recruit has no icon in Discord, so it shows none.
    */
   clanRankIcons: {
+    Bronze: "/icons/ranks/bronze.png",
     Iron: "/icons/ranks/iron.png",
     Steel: "/icons/ranks/steel.png",
     Black: "/icons/ranks/black.png",
