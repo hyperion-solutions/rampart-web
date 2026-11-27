@@ -8,6 +8,7 @@ import { changeBoardStatusAction, updateBoardAction } from "../actions";
 import { BoardForm } from "../_components/board-form";
 import { StatusBadge } from "../_components/status-badge";
 import { BoardEditor } from "./board-editor";
+import { BoardTools } from "./board-tools";
 import { TeamsSection } from "./teams-section";
 
 export const metadata = { title: "Bingo board | Rampart" };
@@ -79,6 +80,9 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
 
       <div className="pixel-box p-6" id="board-editor">
         <h2 className="mb-4 font-pixel text-pixel text-brass text-shadow-pixel">Squares</h2>
+        {board.status === "draft" && (
+          <BoardTools boardId={board.id} filled={tiles.length} total={board.size * board.size} />
+        )}
         <BoardEditor
           boardId={board.id}
           size={board.size}
