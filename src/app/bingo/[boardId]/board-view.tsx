@@ -191,7 +191,7 @@ function TileDetails({
                   type="button"
                   disabled={pending}
                   onClick={() => run(() => markTileAction(boardId, team.id, tile.id, note))}
-                  className="pixel-btn bg-gain/80 text-obsidian disabled:opacity-60"
+                  className="pixel-btn bg-gain text-obsidian [text-shadow:none] disabled:opacity-60"
                 >
                   {pending ? "Marking..." : `Mark complete for ${team.name}`}
                 </button>
