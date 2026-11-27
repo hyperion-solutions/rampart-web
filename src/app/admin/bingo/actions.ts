@@ -141,3 +141,11 @@ export async function removeTeamMemberAction(formData: FormData): Promise<void> 
   );
   revalidatePath(`/admin/bingo/${boardId}`);
 }
+
+export async function setCaptainAction(formData: FormData): Promise<void> {
+  const boardId = String(formData.get("boardId") ?? "");
+  await requireAdmin(`/admin/bingo/${boardId}`);
+  const userId = String(formData.get("userId") ?? "");
+  await container.bingo.setTeamCaptain.execute(boardId, String(formData.get("teamId") ?? ""), userId || null);
+  revalidatePath(`/admin/bingo/${boardId}`);
+}

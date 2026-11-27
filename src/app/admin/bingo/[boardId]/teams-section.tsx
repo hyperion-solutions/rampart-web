@@ -1,7 +1,7 @@
 import { teamSwatch } from "@/app/_components/team-colour";
 import type { Player } from "@/modules/bingo/domain/player-directory";
 import type { Team, TeamMember } from "@/modules/bingo/domain/team";
-import { removeTeamAction, removeTeamMemberAction } from "../actions";
+import { removeTeamAction, removeTeamMemberAction, setCaptainAction } from "../actions";
 import { AddMember } from "./add-member";
 import { CreateTeamForm } from "./create-team-form";
 
@@ -48,6 +48,9 @@ export function TeamsSection({
                   <li key={m.userId} className="flex items-center justify-between gap-3 py-1.5">
                     <span>
                       <span className="font-pixel text-pixel text-limestone text-shadow-pixel">{m.displayName}</span>{" "}
+                      {team.captainUserId === m.userId && (
+                        <span className="font-pixel text-pixel text-brass text-shadow-pixel">★ Captain </span>
+                      )}
                       <span className="text-steel">{players.get(m.userId)?.rsns.join(", ")}</span>
                     </span>
                     {!readOnly && (
@@ -63,6 +66,30 @@ export function TeamsSection({
                   </li>
                 ))}
               </ul>
+              {!readOnly && teamMembers.length > 0 && (
+                <form action={setCaptainAction} className="flex flex-wrap items-end gap-2">
+                  <input type="hidden" name="boardId" value={boardId} />
+                  <input type="hidden" name="teamId" value={team.id} />
+                  <label className="block flex-1">
+                    <span className="font-pixel text-pixel text-steel text-shadow-pixel">Captain (can add drops for this team)</span>
+                    <select
+                      name="userId"
+                      defaultValue={team.captainUserId ?? ""}
+                      className="mt-1 block w-full border-4 border-black bg-obsidian px-3 py-2 font-pixel text-pixel text-limestone outline-none focus:border-rune"
+                    >
+                      <option value="">No captain</option>
+                      {teamMembers.map((m) => (
+                        <option key={m.userId} value={m.userId}>
+                          {m.displayName}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button type="submit" className="pixel-btn bg-granite text-brass">
+                    Save
+                  </button>
+                </form>
+              )}
               {!readOnly && <AddMember boardId={boardId} teamId={team.id} teamName={team.name} />}
             </article>
           );
