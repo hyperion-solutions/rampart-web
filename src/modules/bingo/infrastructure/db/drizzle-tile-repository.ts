@@ -69,6 +69,14 @@ export class DrizzleTileRepository implements TileRepository {
       .where(and(eq(bingoTiles.boardId, boardId), eq(bingoTiles.row, row), eq(bingoTiles.col, col)));
   }
 
+  async clearAll(boardId: string): Promise<number> {
+    const removed = await this.db()
+      .delete(bingoTiles)
+      .where(eq(bingoTiles.boardId, boardId))
+      .returning({ id: bingoTiles.id });
+    return removed.length;
+  }
+
   async removeOutside(boardId: string, size: number): Promise<number> {
     const removed = await this.db()
       .delete(bingoTiles)

@@ -49,6 +49,9 @@ import { DrizzlePlayerDirectory } from "@/modules/bingo/infrastructure/db/drizzl
 import { AddTileProgress, ForgetBingoPlayer, UndoLastProgress } from "@/modules/bingo/application/tile-progress";
 import { DrizzleProgressRepository } from "@/modules/bingo/infrastructure/db/drizzle-progress-repository";
 import { ClearTile } from "@/modules/bingo/application/clear-tile";
+import { ClearBoard } from "@/modules/bingo/application/clear-board";
+import { FillBoardRandomly } from "@/modules/bingo/application/fill-board";
+import { DrizzleRandomItemPicker } from "@/modules/items/infrastructure/db/drizzle-random-item-picker";
 import { CreateBoard } from "@/modules/bingo/application/create-board";
 import { GetBoardOverview } from "@/modules/bingo/application/get-board-overview";
 import { ListBoards } from "@/modules/bingo/application/list-boards";
@@ -117,6 +120,8 @@ export function createContainer() {
       getBoardOverview: new GetBoardOverview(bingoBoards, bingoTiles, bingoTeams, bingoCompletions, bingoProgress),
       saveTile: new SaveTile(bingoBoards, bingoTiles),
       clearTile: new ClearTile(bingoBoards, bingoTiles),
+      clearBoard: new ClearBoard(bingoBoards, bingoTiles),
+      fillBoardRandomly: new FillBoardRandomly(bingoBoards, bingoTiles, new DrizzleRandomItemPicker(getItemsDb)),
       createTeam: new CreateTeam(bingoBoards, bingoTeams),
       removeTeam: new RemoveTeam(bingoBoards, bingoTeams),
       addTeamMember: new AddTeamMember(bingoBoards, bingoTeams, bingoPlayers),

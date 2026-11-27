@@ -21,6 +21,8 @@ export interface TileRepository {
   save(boardId: string, tile: TileInput): Promise<Tile>;
   /** Empties the square at (row, col). */
   clear(boardId: string, row: number, col: number): Promise<void>;
+  /** Empties every square. Returns how many were removed. */
+  clearAll(boardId: string): Promise<number>;
   /** Removes tiles outside a smaller grid. */
   removeOutside(boardId: string, size: number): Promise<number>;
 }
