@@ -27,20 +27,19 @@ export const site = {
     Leader: "1523868355088617654",
   },
   /**
-   * In-game clan rank icon to show for each Discord rank (Wise Old Man's icon names).
-   * Co-leader has no icon of its own, so it uses Deputy owner's key; Black has none and shows no icon.
+   * Rank role icons, copied from the Rampart Discord (64x64 PNGs in public/icons/ranks).
+   * Recruit has no icon in Discord. Bronze is still to be added (#39).
    */
   clanRankIcons: {
-    Recruit: "recruit",
-    Bronze: "bronze",
-    Iron: "iron",
-    Steel: "steel",
-    Mithril: "mithril",
-    Adamant: "adamant",
-    Rune: "rune",
-    Dragon: "dragon",
-    Officer: "officer",
-    "Co-leader": "deputy_owner",
-    Leader: "leader",
+    Iron: "/icons/ranks/iron.png",
+    Steel: "/icons/ranks/steel.png",
+    Black: "/icons/ranks/black.png",
+    Mithril: "/icons/ranks/mithril.png",
+    Adamant: "/icons/ranks/adamant.png",
+    Rune: "/icons/ranks/rune.png",
+    Dragon: "/icons/ranks/dragon.png",
+    Officer: "/icons/ranks/officer.png",
+    "Co-leader": "/icons/ranks/co-leader.png",
+    Leader: "/icons/ranks/leader.png",
   } as Readonly<Record<string, string>>,
 } as const;

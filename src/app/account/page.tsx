@@ -25,8 +25,8 @@ export default async function AccountPage() {
           <p className="font-pixel text-pixel text-limestone text-shadow-pixel">{name}</p>
           <p className="flex items-center gap-2 text-steel text-shadow-pixel">
             {rankIconUrl && (
-              // 13x13 pixel art at 2x, served through our image service (see next.config.ts).
-              <Image src={rankIconUrl} alt="" width={26} height={26} quality={100} className="pixelated" />
+              // The rank's Discord role icon (public/icons/ranks), served as the original PNG.
+              <Image src={rankIconUrl} alt="" width={24} height={24} unoptimized />
             )}
             {rank ? `${rank} in the Rampart Discord` : "Rampart Discord member"}
           </p>
