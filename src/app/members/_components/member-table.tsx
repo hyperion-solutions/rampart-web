@@ -2,6 +2,7 @@ import type { Member } from "@/modules/clan/domain/member";
 import { formatDate, formatLabel, formatNumber, formatRelative, formatXp } from "@/shared/lib/format";
 import { BUILD_LABELS } from "@/app/_components/labels";
 import { AccountTypeIcon, RankIcon } from "@/app/_components/member-icons";
+import { VerifiedBadge } from "@/app/_components/verified-accounts";
 
 export function MemberTable({ members }: { members: readonly Member[] }) {
   return (
@@ -22,7 +23,7 @@ export function MemberTable({ members }: { members: readonly Member[] }) {
         <tbody className="divide-y-4 divide-obsidian text-shadow-pixel">
           {members.map((m) => (
             <tr key={m.id} className="transition-colors hover:bg-rune/20">
-              <td className="px-4 py-2">
+              <td className="flex items-center gap-2 px-4 py-2">
                 <a
                   href={m.profileUrl}
                   target="_blank"
@@ -32,6 +33,7 @@ export function MemberTable({ members }: { members: readonly Member[] }) {
                   <AccountTypeIcon member={m} />
                   {m.displayName}
                 </a>
+                <VerifiedBadge womPlayerId={m.id} />
               </td>
               <td className="px-4">
                 <span className="flex items-center gap-2 whitespace-nowrap text-lightning">

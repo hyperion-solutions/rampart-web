@@ -9,6 +9,7 @@ import { CreateLinkToken } from "@/modules/accounts/application/create-link-toke
 import { GetMyAccountsOverview } from "@/modules/accounts/application/get-my-accounts-overview";
 import { GetLinkToken } from "@/modules/accounts/application/get-link-token";
 import { LinkAccountFromDink } from "@/modules/accounts/application/link-account-from-dink";
+import { ListVerifiedPlayerIds } from "@/modules/accounts/application/list-verified-player-ids";
 import { ListMyAccounts } from "@/modules/accounts/application/list-my-accounts";
 import { RevokeLinkToken } from "@/modules/accounts/application/revoke-link-token";
 import { UnlinkAccount } from "@/modules/accounts/application/unlink-account";
@@ -48,6 +49,7 @@ export function createContainer() {
     ),
     listMyAccounts: new ListMyAccounts(linkedAccounts),
     getMyAccountsOverview: new GetMyAccountsOverview(linkedAccounts, clanRoster),
+    listVerifiedPlayerIds: new ListVerifiedPlayerIds(linkedAccounts),
     unlinkAccount: new UnlinkAccount(linkedAccounts),
     /** Turns a Dink HTTP request into a domain notification (adapter). */
     readDinkNotification,
