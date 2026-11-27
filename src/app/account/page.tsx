@@ -9,7 +9,7 @@ export default async function AccountPage() {
   const session = await auth();
   if (!session?.user) redirect("/signin?callbackUrl=/account");
 
-  const { name, image } = session.user;
+  const { name, image, rank } = session.user;
 
   async function signOutAction() {
     "use server";
@@ -23,7 +23,7 @@ export default async function AccountPage() {
         {image && <Image src={image} alt="" width={64} height={64} className="size-16 border-4 border-black" />}
         <div className="flex-1">
           <p className="font-pixel text-pixel text-limestone text-shadow-pixel">{name}</p>
-          <p className="text-steel text-shadow-pixel">Rampart Discord member</p>
+          <p className="text-steel text-shadow-pixel">{rank ? `${rank} in the Rampart Discord` : "Rampart Discord member"}</p>
         </div>
         <form action={signOutAction}>
           <button type="submit" className="pixel-btn bg-granite text-brass">
