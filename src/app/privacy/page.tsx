@@ -26,6 +26,10 @@ const stored = [
     why: "The RSN you asked for, when, and whether an admin approved it, so admins can review it and you can see the result.",
   },
   {
+    what: "Which bingo team you're on, and the tiles your team completes",
+    why: "To run clan bingo events and show the board and scoreboard. Admins add members to teams.",
+  },
+  {
     what: "A scrambled copy (hash) of your Dink link",
     why: "To recognise your link when Dink uses it. The link itself isn't stored, so it can't be read back.",
   },
@@ -102,7 +106,7 @@ export default async function PrivacyPage({ searchParams }: { searchParams: Prom
             <Link href="/account" className="text-brass hover:text-limestone">
               My account
             </Link>
-            . It removes your profile, linked accounts, link requests and Dink link straight away.
+            . It removes your profile, linked accounts, link requests, bingo team places and Dink link straight away.
           </li>
           <li>
             Remove the site&apos;s access in Discord: User Settings, then Authorized Apps.

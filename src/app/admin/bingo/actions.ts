@@ -89,3 +89,49 @@ export async function clearTileAction(boardId: string, row: number, col: number)
   revalidatePath(`/admin/bingo/${boardId}`);
   return { ok: true };
 }
+
+export type TeamFormState = { readonly error: string } | null;
+
+export async function createTeamAction(_prev: TeamFormState, formData: FormData): Promise<TeamFormState> {
+  const boardId = String(formData.get("boardId") ?? "");
+  await requireAdmin(`/admin/bingo/${boardId}`);
+  const result = await container.bingo.createTeam.execute(
+    boardId,
+    String(formData.get("name") ?? ""),
+    String(formData.get("colour") ?? "") || null,
+  );
+  if (!result.ok) return { error: result.error };
+  revalidatePath(`/admin/bingo/${boardId}`);
+  return null;
+}
+
+export async function removeTeamAction(formData: FormData): Promise<void> {
+  const boardId = String(formData.get("boardId") ?? "");
+  await requireAdmin(`/admin/bingo/${boardId}`);
+  await container.bingo.removeTeam.execute(boardId, String(formData.get("teamId") ?? ""));
+  revalidatePath(`/admin/bingo/${boardId}`);
+}
+
+export async function searchPlayersAction(query: string) {
+  await requireAdmin("/admin/bingo");
+  return typeof query === "string" ? container.bingo.searchPlayers.execute(query) : [];
+}
+
+export async function addTeamMemberAction(boardId: string, teamId: string, userId: string): Promise<TileActionResult> {
+  await requireAdmin(`/admin/bingo/${boardId}`);
+  const result = await container.bingo.addTeamMember.execute(boardId, teamId, userId);
+  if (!result.ok) return { ok: false, error: result.error };
+  revalidatePath(`/admin/bingo/${boardId}`);
+  return { ok: true };
+}
+
+export async function removeTeamMemberAction(formData: FormData): Promise<void> {
+  const boardId = String(formData.get("boardId") ?? "");
+  await requireAdmin(`/admin/bingo/${boardId}`);
+  await container.bingo.removeTeamMember.execute(
+    boardId,
+    String(formData.get("teamId") ?? ""),
+    String(formData.get("userId") ?? ""),
+  );
+  revalidatePath(`/admin/bingo/${boardId}`);
+}
