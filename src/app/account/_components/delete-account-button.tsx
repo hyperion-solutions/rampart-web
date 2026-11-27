@@ -28,7 +28,7 @@ export function DeleteAccountButton() {
   return (
     <form action={deleteMyData} className="space-y-3">
       <p className="text-limestone text-shadow-pixel">
-        This deletes your profile, all your linked accounts, link requests and your Dink link, and signs you out. It can&apos;t be
+        This deletes your profile, all your linked accounts, link requests, bingo team places and your Dink link, and signs you out. It can&apos;t be
         undone. You can sign in again later to start fresh.
       </p>
       <div className="flex flex-wrap items-center gap-4">

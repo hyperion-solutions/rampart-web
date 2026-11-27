@@ -35,6 +35,8 @@ import { getItemsDb } from "@/modules/items/infrastructure/db/client";
 import { DrizzleItemCatalogRepository } from "@/modules/items/infrastructure/db/drizzle-item-catalog-repository";
 import { HttpItemSourceReader } from "@/modules/items/infrastructure/sources/http-item-source-reader";
 import { ChangeBoardStatus } from "@/modules/bingo/application/change-board-status";
+import { AddTeamMember, CreateTeam, GetPlayers, RemoveTeam, RemoveTeamMember, SearchPlayers } from "@/modules/bingo/application/manage-teams";
+import { DrizzlePlayerDirectory } from "@/modules/bingo/infrastructure/db/drizzle-player-directory";
 import { ClearTile } from "@/modules/bingo/application/clear-tile";
 import { CreateBoard } from "@/modules/bingo/application/create-board";
 import { GetBoardOverview } from "@/modules/bingo/application/get-board-overview";
@@ -64,6 +66,7 @@ export function createContainer() {
   const bingoTiles = new DrizzleTileRepository(getBingoDb);
   const bingoTeams = new DrizzleTeamRepository(getBingoDb);
   const bingoCompletions = new DrizzleCompletionRepository(getBingoDb);
+  const bingoPlayers = new DrizzlePlayerDirectory(getBingoDb);
   return {
     getClanOverview: new GetClanOverview(clanRepository),
     getTopGainers: new GetTopGainers(clanRepository),
@@ -101,6 +104,12 @@ export function createContainer() {
       getBoardOverview: new GetBoardOverview(bingoBoards, bingoTiles, bingoTeams, bingoCompletions),
       saveTile: new SaveTile(bingoBoards, bingoTiles),
       clearTile: new ClearTile(bingoBoards, bingoTiles),
+      createTeam: new CreateTeam(bingoBoards, bingoTeams),
+      removeTeam: new RemoveTeam(bingoBoards, bingoTeams),
+      addTeamMember: new AddTeamMember(bingoBoards, bingoTeams, bingoPlayers),
+      removeTeamMember: new RemoveTeamMember(bingoBoards, bingoTeams),
+      searchPlayers: new SearchPlayers(bingoPlayers),
+      getPlayers: new GetPlayers(bingoPlayers),
     },
     unlinkAccount: new UnlinkAccount(linkedAccounts),
     /** Turns a Dink HTTP request into a domain notification (adapter). */

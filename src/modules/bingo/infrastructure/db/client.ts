@@ -4,7 +4,7 @@ import * as accountsSchema from "@/modules/accounts/infrastructure/db/schema";
 import { getSql } from "@/shared/db/connection";
 import * as schema from "./schema";
 
-const createBingoDb = () => drizzle({ client: getSql(), schema: { ...schema, users: accountsSchema.users } });
+const createBingoDb = () => drizzle({ client: getSql(), schema: { ...schema, users: accountsSchema.users, linkedAccounts: accountsSchema.linkedAccounts } });
 export type BingoDb = ReturnType<typeof createBingoDb>;
 
 let db: BingoDb | undefined;

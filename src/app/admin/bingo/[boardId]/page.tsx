@@ -8,6 +8,7 @@ import { changeBoardStatusAction, updateBoardAction } from "../actions";
 import { BoardForm } from "../_components/board-form";
 import { StatusBadge } from "../_components/status-badge";
 import { BoardEditor } from "./board-editor";
+import { TeamsSection } from "./teams-section";
 
 export const metadata = { title: "Bingo board | Rampart" };
 export const dynamic = "force-dynamic";
@@ -26,7 +27,10 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
   await requireAdmin(`/admin/bingo/${boardId}`);
   const overview = await container.bingo.getBoardOverview.execute(boardId, { includeDrafts: true }).catch(() => null);
   if (!overview) notFound();
-  const { board, tiles, maxPoints } = overview;
+  const { board, tiles, maxPoints, teams, members } = overview;
+  const players = new Map(
+    (await container.bingo.getPlayers.execute(members.map((m) => m.userId))).map((p) => [p.userId, p]),
+  );
   const itemIds = tiles.flatMap((t) => [...t.itemIds, ...(t.iconItemId === null ? [] : [t.iconItemId])]);
   const items = Object.fromEntries((await container.getItems.execute(itemIds)).map((i) => [i.id, i]));
 
@@ -80,6 +84,17 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
             iconItemId: t.iconItemId,
             itemIds: t.itemIds,
           }))}
+        />
+      </div>
+
+      <div className="pixel-box p-6">
+        <h2 className="mb-4 font-pixel text-pixel text-brass text-shadow-pixel">Teams</h2>
+        <TeamsSection
+          boardId={board.id}
+          teams={teams}
+          members={members}
+          players={players}
+          readOnly={board.status === "finished"}
         />
       </div>
 
