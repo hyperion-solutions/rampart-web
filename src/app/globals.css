@@ -101,3 +101,12 @@ body {
 
 /* Pixel-art icons (e.g. Wise Old Man rank icons): scale by whole multiples only. */
 .pixelated { image-rendering: pixelated; }
+
+/* 8-bit blink for urgent countdowns: hard on/off steps, no fade. Off for reduced motion. */
+@keyframes blink {
+  50% { opacity: 0.35; }
+}
+.blink { animation: blink 1.2s steps(1, end) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .blink { animation: none; }
+}

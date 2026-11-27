@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BoardCountdown } from "@/app/_components/board-countdown";
 import { container } from "@/composition/container";
 import { requireAdmin } from "@/composition/require-admin";
 import { formatDateTime } from "@/shared/lib/format";
@@ -36,6 +37,7 @@ export default async function AdminBingoPage() {
                   <p className="text-steel text-shadow-pixel">
                     {b.size}×{b.size} · {formatDateTime(b.startsAt)} to {formatDateTime(b.endsAt)}
                   </p>
+                  <BoardCountdown startsAt={b.startsAt.toISOString()} endsAt={b.endsAt.toISOString()} status={b.status} />
                 </div>
                 <StatusBadge status={b.status} />
               </Link>
