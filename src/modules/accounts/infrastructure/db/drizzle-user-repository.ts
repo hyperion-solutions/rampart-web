@@ -1,4 +1,5 @@
 import "server-only";
+import { eq } from "drizzle-orm";
 import type { DiscordProfile, User } from "../../domain/user";
 import type { UserRepository } from "../../domain/user-repository";
 import type { AccountsDb } from "./client";
@@ -28,5 +29,10 @@ export class DrizzleUserRepository implements UserRepository {
       .returning();
     if (!row) throw new Error(`Could not save the user for Discord account ${profile.discordId}`);
     return toUser(row);
+  }
+
+  async delete(userId: string): Promise<void> {
+    // linked_accounts and link_tokens reference users with ON DELETE CASCADE.
+    await this.db().delete(users).where(eq(users.id, userId));
   }
 }

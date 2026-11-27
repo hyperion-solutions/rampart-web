@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { auth } from "@/composition/auth";
+import { auth, signOut } from "@/composition/auth";
 import { container } from "@/composition/container";
 
 /** Unlinks one of the signed-in member's own accounts. */
@@ -15,4 +15,13 @@ export async function unlinkAccount(formData: FormData): Promise<void> {
 
   await container.unlinkAccount.execute(session.user.id, accountId);
   revalidatePath("/account");
+}
+
+/** Deletes the signed-in member's data (user, linked accounts, Dink links) and signs them out. */
+export async function deleteMyData(): Promise<void> {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/signin?callbackUrl=/account");
+
+  await container.deleteMyAccount.execute(session.user.id);
+  await signOut({ redirectTo: "/privacy?deleted=1" });
 }
