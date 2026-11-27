@@ -74,5 +74,10 @@ Significant choices are recorded in `docs/decisions/NNNN-title.md` (context, dec
 - Auth.js is wired in `src/composition/auth.ts` (Discord only, scope `identify guilds.members.read`, no email). Server code gets the session with `auth()`; `session.user.id` is our `users.id` and `session.user.rank` the member's clan rank. Only Discord roles listed in `site.clanRankRoles` let someone sign in; ranks are re-checked daily. Keep public pages static: the header reads the session client-side (`UserMenu`).
 - Dink requests arrive at `/api/dink/[token]` as JSON or `multipart/form-data` (`payload_json`). Validate them before use.
 
+## Bingo (v0.3)
+- See `docs/decisions/0002-bingo.md`. The `items` module owns the OSRS item catalog (imported from RuneLite and the OSRS Wiki, keyed by item id, one canonical id per name); the `bingo` module owns boards, tiles, teams and completions.
+- Store item ids on tiles, never names or image URLs. Item icons come from `static.runelite.net/cache/item/icon/<id>.png` through the image service.
+- Admin-only pages and actions use `requireAdmin()` (Officer and above).
+
 ## Out of scope for now
 Automated tests, Discord bot integration, our own RuneLite plugin (revisit in v0.3, #32).
