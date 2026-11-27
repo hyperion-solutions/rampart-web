@@ -5,6 +5,15 @@ import { GetTopGainers } from "@/modules/clan/application/get-top-gainers";
 import { WomClanRepository } from "@/modules/clan/infrastructure/wiseoldman/wom-clan-repository";
 import { WomClient } from "@/modules/clan/infrastructure/wiseoldman/wom-client";
 import { CheckClanMembership } from "@/modules/accounts/application/check-clan-membership";
+import { CreateLinkToken } from "@/modules/accounts/application/create-link-token";
+import { GetLinkToken } from "@/modules/accounts/application/get-link-token";
+import { LinkAccountFromDink } from "@/modules/accounts/application/link-account-from-dink";
+import { ListMyAccounts } from "@/modules/accounts/application/list-my-accounts";
+import { RevokeLinkToken } from "@/modules/accounts/application/revoke-link-token";
+import { UnlinkAccount } from "@/modules/accounts/application/unlink-account";
+import { ClanRosterDirectory } from "@/modules/accounts/infrastructure/clan/clan-roster-directory";
+import { DrizzleLinkTokenRepository } from "@/modules/accounts/infrastructure/db/drizzle-link-token-repository";
+import { DrizzleLinkedAccountRepository } from "@/modules/accounts/infrastructure/db/drizzle-linked-account-repository";
 import { SignInWithDiscord } from "@/modules/accounts/application/sign-in-with-discord";
 import { getAccountsDb } from "@/modules/accounts/infrastructure/db/client";
 import { DrizzleUserRepository } from "@/modules/accounts/infrastructure/db/drizzle-user-repository";
@@ -17,12 +26,25 @@ export function createContainer() {
   const client = new WomClient({ baseUrl: env.womBaseUrl, userAgent: env.womUserAgent });
   const clanRepository = new WomClanRepository(client, env.womGroupId);
   const clanMembership = new DiscordGuildMembership(site.discordGuildId, site.clanRankRoles);
+  const linkTokens = new DrizzleLinkTokenRepository(getAccountsDb);
+  const linkedAccounts = new DrizzleLinkedAccountRepository(getAccountsDb);
   return {
     getClanOverview: new GetClanOverview(clanRepository),
     getTopGainers: new GetTopGainers(clanRepository),
     getClanRoster: new GetClanRoster(clanRepository),
     signInWithDiscord: new SignInWithDiscord(clanMembership, new DrizzleUserRepository(getAccountsDb)),
     checkClanMembership: new CheckClanMembership(clanMembership),
+    createLinkToken: new CreateLinkToken(linkTokens),
+    revokeLinkToken: new RevokeLinkToken(linkTokens),
+    getLinkToken: new GetLinkToken(linkTokens),
+    linkAccountFromDink: new LinkAccountFromDink(
+      linkTokens,
+      linkedAccounts,
+      new ClanRosterDirectory(clanRepository),
+      site.clanName,
+    ),
+    listMyAccounts: new ListMyAccounts(linkedAccounts),
+    unlinkAccount: new UnlinkAccount(linkedAccounts),
   };
 }
 export const container = createContainer();

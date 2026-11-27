@@ -35,6 +35,9 @@ export const linkTokens = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
     revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    /** Last Dink login seen with this token, shown on the link page. */
+    lastAttemptRsn: text("last_attempt_rsn"),
+    lastAttemptOutcome: text("last_attempt_outcome"),
   },
   (t) => [uniqueIndex("link_tokens_one_active_per_user").on(t.userId).where(sql`${t.revokedAt} is null`)],
 );
