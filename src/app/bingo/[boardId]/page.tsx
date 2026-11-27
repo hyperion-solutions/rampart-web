@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BoardCountdown } from "@/app/_components/board-countdown";
 import { teamSwatch } from "@/app/_components/team-colour";
 import { container } from "@/composition/container";
 import { requireMember } from "@/composition/require-admin";
@@ -100,6 +101,14 @@ export default async function BingoBoardPage({
         <p className="text-steel text-shadow-pixel">
           {board.size}×{board.size} · {formatDateTime(board.startsAt)} to {formatDateTime(board.endsAt)}
         </p>
+        <div className="mt-4">
+          <BoardCountdown
+            variant="title"
+            startsAt={board.startsAt.toISOString()}
+            endsAt={board.endsAt.toISOString()}
+            status={board.status}
+          />
+        </div>
         {board.bonuses.row + board.bonuses.column + board.bonuses.diagonal + board.bonuses.blackout > 0 && (
           <p className="mt-2 font-pixel text-pixel text-brass text-shadow-pixel">
             Bonuses:{" "}
