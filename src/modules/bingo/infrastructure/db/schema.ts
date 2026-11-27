@@ -123,6 +123,41 @@ export const bingoCompletions = pgTable(
     markedBy: uuid("marked_by").references(() => users.id, { onDelete: "set null" }),
     /** e.g. a link to the Discord screenshot. */
     note: text("note"),
+    /** The member whose drop finished the tile, and on which RSN (unknown for completions before progress existed). */
+    completedBy: uuid("completed_by").references(() => users.id, { onDelete: "set null" }),
+    completedRsn: text("completed_rsn"),
   },
   (t) => [unique("bingo_completions_once").on(t.teamId, t.tileId)],
+);
+
+/**
+ * One drop (or several) counted toward a tile for a team. The tile completes when the amounts
+ * reach its quantity; nothing more can be added after that.
+ */
+export const bingoTileProgress = pgTable(
+  "bingo_tile_progress",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => bingoTeams.id, { onDelete: "cascade" }),
+    tileId: uuid("tile_id")
+      .notNull()
+      .references(() => bingoTiles.id, { onDelete: "cascade" }),
+    amount: integer("amount").notNull(),
+    /** Which of the tile's items it was, when known. */
+    itemId: integer("item_id"),
+    /** Who got the drop. Null only if that member later deleted their data. */
+    obtainedBy: uuid("obtained_by").references(() => users.id, { onDelete: "set null" }),
+    obtainedRsn: text("obtained_rsn"),
+    source: completionSource("source").notNull().default("admin"),
+    /** The admin who added it; null for Dink. */
+    addedBy: uuid("added_by").references(() => users.id, { onDelete: "set null" }),
+    note: text("note"),
+    addedAt: timestamp("added_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("bingo_tile_progress_team_tile").on(t.teamId, t.tileId),
+    check("bingo_tile_progress_amount", sql`${t.amount} >= 1`),
+  ],
 );

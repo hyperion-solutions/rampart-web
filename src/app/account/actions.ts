@@ -22,6 +22,8 @@ export async function deleteMyData(): Promise<void> {
   const session = await auth();
   if (!session?.user?.id) redirect("/signin?callbackUrl=/account");
 
+  // Bingo history keeps team points but loses this member's name and RSNs.
+  await container.bingo.forgetPlayer.execute(session.user.id);
   await container.deleteMyAccount.execute(session.user.id);
   await signOut({ redirectTo: "/privacy?deleted=1" });
 }

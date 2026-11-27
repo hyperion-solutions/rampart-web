@@ -5,7 +5,8 @@ import { container } from "@/composition/container";
 import { requireMember } from "@/composition/require-admin";
 import { formatDateTime } from "@/shared/lib/format";
 import { SectionHeading } from "@/shared/ui/section-heading";
-import { BoardView, type ViewCompletion } from "./board-view";
+import { tileProgress } from "@/modules/bingo/domain/progress";
+import { BoardView, type ViewTileState } from "./board-view";
 
 export const metadata = { title: "Bingo board | Rampart" };
 export const dynamic = "force-dynamic";
@@ -25,7 +26,7 @@ export default async function BingoBoardPage({
   // Admins can preview drafts here; members only see live and finished boards.
   const overview = await container.bingo.getBoardOverview.execute(boardId, { includeDrafts: isAdmin }).catch(() => null);
   if (!overview) notFound();
-  const { board, tiles, teams, members, completions, scores, maxPoints } = overview;
+  const { board, tiles, teams, members, completions, progress, scores, maxPoints } = overview;
 
   const myTeamId = members.find((m) => m.userId === user.id)?.teamId;
   const selectedTeam =
@@ -33,11 +34,38 @@ export default async function BingoBoardPage({
 
   const itemIds = tiles.flatMap((t) => [...t.itemIds, ...(t.iconItemId === null ? [] : [t.iconItemId])]);
   const items = new Map((await container.getItems.execute(itemIds)).map((i) => [i.id, i]));
-  const teamCompletions: Record<string, ViewCompletion> = Object.fromEntries(
-    completions
-      .filter((c) => c.teamId === selectedTeam?.id)
-      .map((c) => [c.tileId, { completedAt: c.completedAt.toISOString(), note: c.note }]),
+  const states: Record<string, ViewTileState> = Object.fromEntries(
+    tiles.map((t) => {
+      const completion = completions.find((c) => c.teamId === selectedTeam?.id && c.tileId === t.id);
+      const entries = progress.filter((p) => p.teamId === selectedTeam?.id && p.tileId === t.id);
+      const { done, complete } = tileProgress(t.quantity, entries, completion !== undefined);
+      return [
+        t.id,
+        {
+          done,
+          complete,
+          completedAt: completion?.completedAt.toISOString() ?? null,
+          completedByName: completion?.completedByName ?? null,
+          completedRsn: completion?.completedRsn ?? null,
+          entries: entries.map((e) => ({
+            id: e.id,
+            amount: e.amount,
+            itemName: e.itemId !== null ? (items.get(e.itemId)?.name ?? null) : null,
+            obtainedByName: e.obtainedByName,
+            obtainedRsn: e.obtainedRsn,
+            source: e.source,
+            addedByName: e.addedByName,
+            note: e.note,
+            addedAt: e.addedAt.toISOString(),
+          })),
+        },
+      ];
+    }),
   );
+  const teamPlayers = selectedTeam
+    ? await container.bingo.getPlayers.execute(members.filter((m) => m.teamId === selectedTeam.id).map((m) => m.userId))
+    : [];
+
 
   return (
     <section className="mx-auto max-w-6xl space-y-8">
@@ -97,8 +125,9 @@ export default async function BingoBoardPage({
           boardId={board.id}
           size={board.size}
           team={selectedTeam ? { id: selectedTeam.id, name: selectedTeam.name } : null}
-          completions={teamCompletions}
-          canMark={isAdmin && board.status === "live"}
+          states={states}
+          members={teamPlayers.map((p) => ({ userId: p.userId, displayName: p.displayName, rsns: p.rsns }))}
+          canEdit={isAdmin && board.status === "live"}
           tiles={tiles.map((t) => ({
             id: t.id,
             row: t.row,
@@ -122,7 +151,7 @@ export default async function BingoBoardPage({
           <Link href={`/admin/bingo/${board.id}`} className="text-brass hover:text-limestone">
             edit this board
           </Link>
-          {board.status === "live" ? ". Pick a team on the scoreboard, then click a tile to mark it." : "."}
+          {board.status === "live" ? ". Pick a team on the scoreboard, then click a tile to add a drop." : "."}
         </p>
       )}
     </section>

@@ -26,8 +26,8 @@ const stored = [
     why: "The RSN you asked for, when, and whether an admin approved it, so admins can review it and you can see the result.",
   },
   {
-    what: "Which bingo team you're on, and the tiles your team completes",
-    why: "To run clan bingo events and show the board and scoreboard. Admins add members to teams.",
+    what: "Which bingo team you're on, and the drops you get for your team",
+    why: "To run clan bingo events and show the board, scoreboard and who got each drop (your Discord name and RSN). If you delete your data, your name and RSN are removed from bingo history; your team keeps its points.",
   },
   {
     what: "A scrambled copy (hash) of your Dink link",
