@@ -36,3 +36,25 @@ export async function turnOffLink(): Promise<void> {
   await container.revokeLinkToken.execute(userId);
   revalidatePath("/account/link");
 }
+
+export type ClaimFormState = { readonly tone: "ok" | "warn"; readonly message: string } | null;
+
+const CLAIM_MESSAGES: Readonly<Record<string, (rsn: string) => string>> = {
+  submitted: (rsn) => `Request sent for ${rsn}. An admin will review it.`,
+  "not-in-clan": (rsn) => `${rsn} isn't in the Rampart clan on Wise Old Man. Check the spelling, or ask to be added to the clan first.`,
+  "already-yours": (rsn) => `${rsn} is already linked to you.`,
+  "owned-by-someone-else": (rsn) => `${rsn} is already linked to another member. Ask an admin on Discord if it's yours.`,
+  "already-pending": (rsn) => `There's already a request waiting for ${rsn}.`,
+};
+
+/** Asks an admin to link an RSN without Dink. */
+export async function requestManualLink(_prev: ClaimFormState, formData: FormData): Promise<ClaimFormState> {
+  const userId = await requireUserId();
+  const rsn = String(formData.get("rsn") ?? "").trim();
+  if (rsn.length === 0 || rsn.length > 12) return { tone: "warn", message: "Enter your RSN (up to 12 characters)." };
+
+  const result = await container.submitLinkClaim.execute(userId, rsn);
+  revalidatePath("/account/link");
+  const message = CLAIM_MESSAGES[result.outcome]?.(result.outcome === "submitted" ? result.claim.rsn : rsn);
+  return { tone: result.outcome === "submitted" ? "ok" : "warn", message: message ?? "Something went wrong. Try again." };
+}

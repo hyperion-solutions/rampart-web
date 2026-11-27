@@ -22,6 +22,10 @@ const stored = [
     why: "To show “Linked Qphy” or why an account wasn't linked.",
   },
   {
+    what: "Link requests you send to admins",
+    why: "The RSN you asked for, when, and whether an admin approved it, so admins can review it and you can see the result.",
+  },
+  {
     what: "A scrambled copy (hash) of your Dink link",
     why: "To recognise your link when Dink uses it. The link itself isn't stored, so it can't be read back.",
   },
@@ -98,7 +102,7 @@ export default async function PrivacyPage({ searchParams }: { searchParams: Prom
             <Link href="/account" className="text-brass hover:text-limestone">
               My account
             </Link>
-            . It removes your profile, linked accounts and Dink link straight away.
+            . It removes your profile, linked accounts, link requests and Dink link straight away.
           </li>
           <li>
             Remove the site&apos;s access in Discord: User Settings, then Authorized Apps.

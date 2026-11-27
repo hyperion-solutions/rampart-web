@@ -8,6 +8,7 @@ import { SectionHeading } from "@/shared/ui/section-heading";
 import { turnOffLink } from "./actions";
 import { AutoRefresh } from "./_components/auto-refresh";
 import { CreateLinkForm } from "./_components/create-link-form";
+import { ManualLinkForm } from "./_components/manual-link-form";
 
 export const metadata = { title: "Link your account | Rampart" };
 export const dynamic = "force-dynamic";
@@ -44,7 +45,10 @@ export default async function LinkAccountPage() {
   const userId = session?.user?.id;
   if (!userId) redirect("/signin?callbackUrl=/account/link");
 
-  const token = await container.getLinkToken.execute(userId);
+  const [token, claims] = await Promise.all([
+    container.getLinkToken.execute(userId),
+    container.listMyClaims.execute(userId),
+  ]);
   const attempt = token?.lastAttempt ?? null;
   const message = attempt ? attemptMessage(attempt) : null;
 
@@ -106,6 +110,35 @@ export default async function LinkAccountPage() {
             </button>
             <p className="text-steel text-shadow-pixel">Accounts you already linked stay linked.</p>
           </form>
+        )}
+      </div>
+
+      <div className="pixel-box space-y-4 p-6">
+        <h2 className="font-pixel text-pixel text-brass text-shadow-pixel">Can&apos;t use Dink?</h2>
+        <p className="text-steel text-shadow-pixel">
+          Ask an admin to link your RSN instead. They&apos;ll check it&apos;s yours, usually by asking you on Discord. If you
+          later log in with Dink, it&apos;s verified automatically.
+        </p>
+        <ManualLinkForm />
+        {claims.length > 0 && (
+          <ul className="divide-y-4 divide-obsidian">
+            {claims.map((c) => (
+              <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                <span className="font-pixel text-pixel text-limestone text-shadow-pixel">{c.rsn}</span>
+                <span
+                  className={`font-pixel text-pixel text-shadow-pixel ${
+                    c.status === "approved" ? "text-gain" : c.status === "rejected" ? "text-banner" : "text-brass"
+                  }`}
+                >
+                  {c.status === "pending"
+                    ? `Waiting for an admin (asked ${formatRelative(c.createdAt)})`
+                    : c.status === "approved"
+                      ? "Approved"
+                      : "Not approved: ask an admin on Discord"}
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
 

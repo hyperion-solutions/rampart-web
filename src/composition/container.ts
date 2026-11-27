@@ -6,6 +6,11 @@ import { WomClanRepository } from "@/modules/clan/infrastructure/wiseoldman/wom-
 import { WomClient } from "@/modules/clan/infrastructure/wiseoldman/wom-client";
 import { CheckClanMembership } from "@/modules/accounts/application/check-clan-membership";
 import { CreateLinkToken } from "@/modules/accounts/application/create-link-token";
+import { DecideLinkClaim } from "@/modules/accounts/application/decide-link-claim";
+import { ListMyClaims } from "@/modules/accounts/application/list-my-claims";
+import { ListPendingClaims } from "@/modules/accounts/application/list-pending-claims";
+import { SubmitLinkClaim } from "@/modules/accounts/application/submit-link-claim";
+import { DrizzleLinkClaimRepository } from "@/modules/accounts/infrastructure/db/drizzle-link-claim-repository";
 import { DeleteMyAccount } from "@/modules/accounts/application/delete-my-account";
 import { GetMyAccountsOverview } from "@/modules/accounts/application/get-my-accounts-overview";
 import { GetLinkToken } from "@/modules/accounts/application/get-link-token";
@@ -34,6 +39,7 @@ export function createContainer() {
   const linkTokens = new DrizzleLinkTokenRepository(getAccountsDb);
   const linkedAccounts = new DrizzleLinkedAccountRepository(getAccountsDb);
   const clanRoster = new ClanRosterDirectory(clanRepository);
+  const linkClaims = new DrizzleLinkClaimRepository(getAccountsDb);
   return {
     getClanOverview: new GetClanOverview(clanRepository),
     getTopGainers: new GetTopGainers(clanRepository),
@@ -53,6 +59,10 @@ export function createContainer() {
     listMyAccounts: new ListMyAccounts(linkedAccounts),
     getMyAccountsOverview: new GetMyAccountsOverview(linkedAccounts, clanRoster),
     listVerifiedPlayerIds: new ListVerifiedPlayerIds(linkedAccounts),
+    submitLinkClaim: new SubmitLinkClaim(linkClaims, linkedAccounts, clanRoster),
+    listMyClaims: new ListMyClaims(linkClaims),
+    listPendingClaims: new ListPendingClaims(linkClaims),
+    decideLinkClaim: new DecideLinkClaim(linkClaims, linkedAccounts),
     unlinkAccount: new UnlinkAccount(linkedAccounts),
     /** Turns a Dink HTTP request into a domain notification (adapter). */
     readDinkNotification,

@@ -85,6 +85,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
       if (typeof token.userId === "string") session.user.id = token.userId;
       session.user.rank = token.rank;
       session.user.rankIconUrl = token.rank ? site.clanRankIcons[token.rank] : undefined;
+      session.user.isAdmin = token.rank !== undefined && site.adminRanks.includes(token.rank);
       return session;
     },
   },
