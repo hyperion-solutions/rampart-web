@@ -17,6 +17,7 @@ import { DrizzleLinkedAccountRepository } from "@/modules/accounts/infrastructur
 import { SignInWithDiscord } from "@/modules/accounts/application/sign-in-with-discord";
 import { getAccountsDb } from "@/modules/accounts/infrastructure/db/client";
 import { DrizzleUserRepository } from "@/modules/accounts/infrastructure/db/drizzle-user-repository";
+import { readDinkNotification } from "@/modules/accounts/infrastructure/dink/read-dink-notification";
 import { DiscordGuildMembership } from "@/modules/accounts/infrastructure/discord/discord-guild-membership";
 import { env } from "@/shared/config/env";
 import { site } from "@/shared/config/site";
@@ -45,6 +46,8 @@ export function createContainer() {
     ),
     listMyAccounts: new ListMyAccounts(linkedAccounts),
     unlinkAccount: new UnlinkAccount(linkedAccounts),
+    /** Turns a Dink HTTP request into a domain notification (adapter). */
+    readDinkNotification,
   };
 }
 export const container = createContainer();
