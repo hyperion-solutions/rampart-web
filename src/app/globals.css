@@ -123,3 +123,40 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .line-glow { animation: none; }
 }
+
+/*
+ * Landing hero storm (StormBackdrop): night sky, drifting pixel clouds, lightning.
+ * Lightning flashes are hard on/off steps (8-bit), never fades. All motion stops for reduced motion.
+ */
+.storm-sky {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-rune) 18%, var(--color-obsidian)),
+    color-mix(in srgb, var(--color-rune) 8%, var(--color-obsidian)) 45%,
+    var(--color-obsidian)
+  );
+}
+@keyframes storm-drift {
+  from { transform: translateX(-6%); }
+  to { transform: translateX(6%); }
+}
+.storm-cloud { animation: storm-drift linear infinite alternate; }
+.storm-cloud-slow { animation-duration: 70s; }
+.storm-cloud-fast { animation-duration: 40s; animation-direction: alternate-reverse; }
+
+/* A bolt is visible for two short blinks near the end of each 7 s cycle. */
+@keyframes storm-strike {
+  0%, 88%, 90%, 92%, 100% { opacity: 0; }
+  89%, 91% { opacity: 1; }
+}
+.storm-bolt { opacity: 0; animation: storm-strike 7s steps(1, end) infinite; }
+/* The sky lights up with each strike (both bolts: twice per 3.5 s). */
+@keyframes storm-sky-flash {
+  0%, 88%, 90%, 92%, 100% { opacity: 0; }
+  89%, 91% { opacity: 0.12; }
+}
+.storm-flash { opacity: 0; animation: storm-sky-flash 3.5s steps(1, end) infinite; animation-delay: -0.1s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .storm-cloud, .storm-bolt, .storm-flash { animation: none; }
+}

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { StormBackdrop } from "@/app/_components/storm-backdrop";
 import { TopGainers } from "@/app/_components/top-gainers";
 import { container } from "@/composition/container";
 import { formatNumber } from "@/shared/lib/format";
@@ -46,7 +47,8 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-24">
-      <section className="pt-4 text-center">
+      <section className="relative isolate pt-4 text-center">
+        <StormBackdrop />
         <div className="storm mx-auto max-w-[560px]">
           <Image
             src="/brand/rampart-crest.webp"
