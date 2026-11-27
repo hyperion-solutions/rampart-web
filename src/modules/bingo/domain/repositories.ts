@@ -1,4 +1,5 @@
 import type { Board, BoardDetails, BoardStatus } from "./board";
+import type { NewProgressEntry, ProgressEntry } from "./progress";
 import type { Completion, CompletionSource } from "./completion";
 import type { Team, TeamMember } from "./team";
 import type { Tile, TileInput } from "./tile";
@@ -45,6 +46,22 @@ export interface CompletionRepository {
     source: CompletionSource;
     markedBy: string | null;
     note: string | null;
+    completedBy: string | null;
+    completedRsn: string | null;
   }): Promise<Completion | null>;
   unmark(teamId: string, tileId: string): Promise<void>;
+}
+
+/** Port: progress entries toward tiles. */
+export interface ProgressRepository {
+  listForBoard(boardId: string): Promise<ProgressEntry[]>;
+  listFor(teamId: string, tileId: string): Promise<ProgressEntry[]>;
+  add(entry: NewProgressEntry): Promise<void>;
+  /** Removes the newest entry for the team and tile. Returns whether one existed. */
+  removeLast(teamId: string, tileId: string): Promise<boolean>;
+}
+
+/** Port: removes a member's name and RSNs from bingo history when they delete their data. */
+export interface BingoHistoryEraser {
+  forget(userId: string): Promise<void>;
 }

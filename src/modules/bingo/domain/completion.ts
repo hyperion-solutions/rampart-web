@@ -11,6 +11,10 @@ export interface Completion {
   readonly source: CompletionSource;
   readonly markedBy: string | null;
   readonly note: string | null;
+  /** The member whose drop finished the tile (unknown for completions before progress existed). */
+  readonly completedBy: string | null;
+  readonly completedByName: string | null;
+  readonly completedRsn: string | null;
 }
 
 export interface TeamScore {

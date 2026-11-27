@@ -37,7 +37,8 @@ import { HttpItemSourceReader } from "@/modules/items/infrastructure/sources/htt
 import { ChangeBoardStatus } from "@/modules/bingo/application/change-board-status";
 import { AddTeamMember, CreateTeam, GetPlayers, RemoveTeam, RemoveTeamMember, SearchPlayers } from "@/modules/bingo/application/manage-teams";
 import { DrizzlePlayerDirectory } from "@/modules/bingo/infrastructure/db/drizzle-player-directory";
-import { MarkTileComplete, UndoTileCompletion } from "@/modules/bingo/application/mark-completions";
+import { AddTileProgress, ForgetBingoPlayer, UndoLastProgress } from "@/modules/bingo/application/tile-progress";
+import { DrizzleProgressRepository } from "@/modules/bingo/infrastructure/db/drizzle-progress-repository";
 import { ClearTile } from "@/modules/bingo/application/clear-tile";
 import { CreateBoard } from "@/modules/bingo/application/create-board";
 import { GetBoardOverview } from "@/modules/bingo/application/get-board-overview";
@@ -68,6 +69,7 @@ export function createContainer() {
   const bingoTeams = new DrizzleTeamRepository(getBingoDb);
   const bingoCompletions = new DrizzleCompletionRepository(getBingoDb);
   const bingoPlayers = new DrizzlePlayerDirectory(getBingoDb);
+  const bingoProgress = new DrizzleProgressRepository(getBingoDb);
   return {
     getClanOverview: new GetClanOverview(clanRepository),
     getTopGainers: new GetTopGainers(clanRepository),
@@ -102,7 +104,7 @@ export function createContainer() {
       updateBoard: new UpdateBoard(bingoBoards, bingoTiles),
       changeBoardStatus: new ChangeBoardStatus(bingoBoards),
       listBoards: new ListBoards(bingoBoards),
-      getBoardOverview: new GetBoardOverview(bingoBoards, bingoTiles, bingoTeams, bingoCompletions),
+      getBoardOverview: new GetBoardOverview(bingoBoards, bingoTiles, bingoTeams, bingoCompletions, bingoProgress),
       saveTile: new SaveTile(bingoBoards, bingoTiles),
       clearTile: new ClearTile(bingoBoards, bingoTiles),
       createTeam: new CreateTeam(bingoBoards, bingoTeams),
@@ -111,8 +113,9 @@ export function createContainer() {
       removeTeamMember: new RemoveTeamMember(bingoBoards, bingoTeams),
       searchPlayers: new SearchPlayers(bingoPlayers),
       getPlayers: new GetPlayers(bingoPlayers),
-      markTileComplete: new MarkTileComplete(bingoBoards, bingoTeams, bingoTiles, bingoCompletions),
-      undoTileCompletion: new UndoTileCompletion(bingoBoards, bingoTeams, bingoTiles, bingoCompletions),
+      addTileProgress: new AddTileProgress(bingoBoards, bingoTiles, bingoTeams, bingoProgress, bingoCompletions, bingoPlayers),
+      undoLastProgress: new UndoLastProgress(bingoBoards, bingoTiles, bingoProgress, bingoCompletions),
+      forgetPlayer: new ForgetBingoPlayer(bingoProgress),
     },
     unlinkAccount: new UnlinkAccount(linkedAccounts),
     /** Turns a Dink HTTP request into a domain notification (adapter). */

@@ -1,5 +1,6 @@
 import "server-only";
 import { and, eq } from "drizzle-orm";
+import { users } from "@/modules/accounts/infrastructure/db/schema";
 import type { Completion, CompletionSource } from "../../domain/completion";
 import type { CompletionRepository } from "../../domain/repositories";
 import type { BingoDb } from "./client";
@@ -7,7 +8,7 @@ import { bingoCompletions, bingoTeams } from "./schema";
 
 type CompletionRow = typeof bingoCompletions.$inferSelect;
 
-const toCompletion = (r: CompletionRow): Completion => ({
+const toCompletion = (r: CompletionRow, completedByName: string | null): Completion => ({
   id: r.id,
   teamId: r.teamId,
   tileId: r.tileId,
@@ -15,6 +16,9 @@ const toCompletion = (r: CompletionRow): Completion => ({
   source: r.source,
   markedBy: r.markedBy,
   note: r.note,
+  completedBy: r.completedBy,
+  completedByName,
+  completedRsn: r.completedRsn,
 });
 
 export class DrizzleCompletionRepository implements CompletionRepository {
@@ -22,11 +26,12 @@ export class DrizzleCompletionRepository implements CompletionRepository {
 
   async listForBoard(boardId: string): Promise<Completion[]> {
     const rows = await this.db()
-      .select({ completion: bingoCompletions })
+      .select({ completion: bingoCompletions, completedByName: users.discordName })
       .from(bingoCompletions)
       .innerJoin(bingoTeams, eq(bingoTeams.id, bingoCompletions.teamId))
+      .leftJoin(users, eq(users.id, bingoCompletions.completedBy))
       .where(eq(bingoTeams.boardId, boardId));
-    return rows.map((r) => toCompletion(r.completion));
+    return rows.map((r) => toCompletion(r.completion, r.completedByName));
   }
 
   async mark(input: {
@@ -35,9 +40,11 @@ export class DrizzleCompletionRepository implements CompletionRepository {
     source: CompletionSource;
     markedBy: string | null;
     note: string | null;
+    completedBy: string | null;
+    completedRsn: string | null;
   }): Promise<Completion | null> {
     const [row] = await this.db().insert(bingoCompletions).values(input).onConflictDoNothing().returning();
-    return row ? toCompletion(row) : null;
+    return row ? toCompletion(row, null) : null;
   }
 
   async unmark(teamId: string, tileId: string): Promise<void> {
