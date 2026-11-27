@@ -6,6 +6,7 @@ import { WomClanRepository } from "@/modules/clan/infrastructure/wiseoldman/wom-
 import { WomClient } from "@/modules/clan/infrastructure/wiseoldman/wom-client";
 import { CheckClanMembership } from "@/modules/accounts/application/check-clan-membership";
 import { CreateLinkToken } from "@/modules/accounts/application/create-link-token";
+import { DeleteMyAccount } from "@/modules/accounts/application/delete-my-account";
 import { GetMyAccountsOverview } from "@/modules/accounts/application/get-my-accounts-overview";
 import { GetLinkToken } from "@/modules/accounts/application/get-link-token";
 import { LinkAccountFromDink } from "@/modules/accounts/application/link-account-from-dink";
@@ -29,6 +30,7 @@ export function createContainer() {
   const client = new WomClient({ baseUrl: env.womBaseUrl, userAgent: env.womUserAgent });
   const clanRepository = new WomClanRepository(client, env.womGroupId);
   const clanMembership = new DiscordGuildMembership(site.discordGuildId, site.clanRankRoles);
+  const users = new DrizzleUserRepository(getAccountsDb);
   const linkTokens = new DrizzleLinkTokenRepository(getAccountsDb);
   const linkedAccounts = new DrizzleLinkedAccountRepository(getAccountsDb);
   const clanRoster = new ClanRosterDirectory(clanRepository);
@@ -36,7 +38,8 @@ export function createContainer() {
     getClanOverview: new GetClanOverview(clanRepository),
     getTopGainers: new GetTopGainers(clanRepository),
     getClanRoster: new GetClanRoster(clanRepository),
-    signInWithDiscord: new SignInWithDiscord(clanMembership, new DrizzleUserRepository(getAccountsDb)),
+    signInWithDiscord: new SignInWithDiscord(clanMembership, users),
+    deleteMyAccount: new DeleteMyAccount(users),
     checkClanMembership: new CheckClanMembership(clanMembership),
     createLinkToken: new CreateLinkToken(linkTokens),
     revokeLinkToken: new RevokeLinkToken(linkTokens),

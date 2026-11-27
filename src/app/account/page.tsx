@@ -5,6 +5,7 @@ import { auth, signOut } from "@/composition/auth";
 import { container } from "@/composition/container";
 import { SectionHeading } from "@/shared/ui/section-heading";
 import { AccountCard } from "./_components/account-card";
+import { DeleteAccountButton } from "./_components/delete-account-button";
 
 export const metadata = { title: "My account | Rampart" };
 
@@ -60,6 +61,18 @@ export default async function AccountPage() {
             ))}
           </div>
         )}
+      </div>
+
+      <div className="pixel-box mt-10 space-y-3 p-6">
+        <h2 className="font-pixel text-pixel text-brass text-shadow-pixel">Your data</h2>
+        <p className="text-steel text-shadow-pixel">
+          See what we store and why on the{" "}
+          <Link href="/privacy" className="text-brass hover:text-limestone">
+            privacy page
+          </Link>
+          . You can delete all of it at any time.
+        </p>
+        <DeleteAccountButton />
       </div>
     </section>
   );
