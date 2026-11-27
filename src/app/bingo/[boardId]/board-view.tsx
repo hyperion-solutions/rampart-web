@@ -57,6 +57,7 @@ export function BoardView({
   states,
   members,
   canEdit,
+  notStartedYet,
   lineSquares,
 }: {
   boardId: string;
@@ -68,6 +69,8 @@ export function BoardView({
   lineSquares: readonly string[];
   members: readonly ViewTeamMember[];
   canEdit: boolean;
+  /** Published but before its start time: nothing can be added yet. */
+  notStartedYet: boolean;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const byPosition = new Map(tiles.map((t) => [`${t.row}:${t.col}`, t]));
@@ -128,6 +131,7 @@ export function BoardView({
             state={states[open.id] ?? EMPTY}
             members={members}
             canEdit={canEdit}
+            notStartedYet={notStartedYet}
             onClose={() => setOpenId(null)}
           />
         ) : (
@@ -168,6 +172,7 @@ function TileDetails({
   state,
   members,
   canEdit,
+  notStartedYet,
   onClose,
 }: {
   boardId: string;
@@ -176,6 +181,7 @@ function TileDetails({
   state: ViewTileState;
   members: readonly ViewTeamMember[];
   canEdit: boolean;
+  notStartedYet: boolean;
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -260,6 +266,12 @@ function TileDetails({
               {tile.quantity > 1
                 ? `${team.name}: ${state.done}/${tile.quantity}, ${remaining} to go.`
                 : `${team.name} hasn't completed this yet.`}
+            </p>
+          )}
+
+          {notStartedYet && (
+            <p className="bg-rune/20 px-3 py-2 text-limestone text-shadow-pixel">
+              The board hasn&apos;t started yet. Drops can be added once it begins.
             </p>
           )}
 

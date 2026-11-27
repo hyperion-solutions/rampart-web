@@ -40,10 +40,16 @@ export class AddTileProgress {
     private readonly players: PlayerDirectory,
   ) {}
 
-  async execute(input: AddProgressInput): Promise<Result<{ done: number; quantity: number; complete: boolean }>> {
+  async execute(
+    input: AddProgressInput,
+    now: Date = new Date(),
+  ): Promise<Result<{ done: number; quantity: number; complete: boolean }>> {
     const board = await this.boards.findById(input.boardId);
     if (!board) return fail("That board doesn't exist.");
     if (board.status !== "live") return fail("Drops can only be added while the board is live.");
+    // Nothing counts before the start. After the end, admins can still catch up on late
+    // screenshots until they finish the board; Dink (#32) only counts drops inside the window.
+    if (now < board.startsAt) return fail("This board hasn't started yet. Drops can be added once it begins.");
 
     const [tiles, teams, members] = await Promise.all([
       this.tiles.listForBoard(input.boardId),

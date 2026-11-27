@@ -183,7 +183,8 @@ export default async function BingoBoardPage({
             board.size,
           )}
           members={teamPlayers.map((p) => ({ userId: p.userId, displayName: p.displayName, rsns: p.rsns }))}
-          canEdit={isAdmin && board.status === "live"}
+          canEdit={isAdmin && board.status === "live" && board.startsAt <= new Date()}
+          notStartedYet={board.status === "live" && board.startsAt > new Date()}
           tiles={tiles.map((t) => ({
             id: t.id,
             row: t.row,
@@ -207,7 +208,11 @@ export default async function BingoBoardPage({
           <Link href={`/admin/bingo/${board.id}`} className="text-brass hover:text-limestone">
             edit this board
           </Link>
-          {board.status === "live" ? ". Pick a team on the scoreboard, then click a tile to add a drop." : "."}
+          {board.status === "live" && board.startsAt > new Date()
+            ? `. Drops can be added once it starts (${formatDateTime(board.startsAt)}).`
+            : board.status === "live"
+              ? ". Pick a team on the scoreboard, then click a tile to add a drop."
+              : "."}
         </p>
       )}
     </section>
