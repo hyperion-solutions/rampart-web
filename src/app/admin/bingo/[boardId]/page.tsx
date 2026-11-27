@@ -50,6 +50,8 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
         <p className="text-steel text-shadow-pixel">
           {board.size}×{board.size} · {formatDateTime(board.startsAt)} to {formatDateTime(board.endsAt)} ·{" "}
           {tiles.length} of {board.size * board.size} squares filled · {maxPoints} points possible
+          {board.bonuses.row + board.bonuses.column + board.bonuses.diagonal + board.bonuses.blackout > 0 &&
+            ` · bonuses: row ${board.bonuses.row}, column ${board.bonuses.column}, diagonal ${board.bonuses.diagonal}, blackout ${board.bonuses.blackout}`}
         </p>
         <div className="flex flex-wrap gap-3">
           {STATUS_ACTIONS[board.status].map((a) => (
@@ -66,6 +68,14 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
           ))}
         </div>
       </div>
+
+      {tiles.length < board.size * board.size && (
+        <p role="status" className="bg-brass/15 px-4 py-3 text-limestone text-shadow-pixel">
+          {board.size * board.size - tiles.length} square{board.size * board.size - tiles.length === 1 ? " is" : "s are"} empty.
+          Empty squares can&apos;t be completed, so rows, columns and diagonals through them never earn a bonus, and the
+          blackout bonus is impossible. Fill them before publishing.
+        </p>
+      )}
 
       <div className="pixel-box p-6" id="board-editor">
         <h2 className="mb-4 font-pixel text-pixel text-brass text-shadow-pixel">Squares</h2>
@@ -113,6 +123,7 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
                 size: board.size,
                 startsAt: board.startsAt.toISOString(),
                 endsAt: board.endsAt.toISOString(),
+                bonuses: board.bonuses,
               }}
             />
           </div>

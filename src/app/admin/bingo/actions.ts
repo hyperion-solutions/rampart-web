@@ -17,6 +17,12 @@ function readDetails(formData: FormData): BoardDetails {
     // The form converts the admin's local time to an ISO timestamp before sending.
     startsAt: new Date(String(formData.get("startsAt") ?? "")),
     endsAt: new Date(String(formData.get("endsAt") ?? "")),
+    bonuses: {
+      row: Number(formData.get("bonusRow") || 0),
+      column: Number(formData.get("bonusColumn") || 0),
+      diagonal: Number(formData.get("bonusDiagonal") || 0),
+      blackout: Number(formData.get("bonusBlackout") || 0),
+    },
   };
 }
 

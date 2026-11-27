@@ -28,7 +28,14 @@ export function BoardForm({
   action: Action;
   submitLabel: string;
   boardId?: string;
-  initial?: { title: string; rules: string; size: number; startsAt: string; endsAt: string };
+  initial?: {
+    title: string;
+    rules: string;
+    size: number;
+    startsAt: string;
+    endsAt: string;
+    bonuses: { row: number; column: number; diagonal: number; blackout: number };
+  };
   sizeLocked?: boolean;
 }) {
   const [state, formAction, pending] = useActionState<BoardFormState, FormData>(action, null);
@@ -85,6 +92,29 @@ export function BoardForm({
         </label>
       </div>
       <p className="text-steel text-shadow-pixel">Times are in your local time zone; members see them in UTC.</p>
+
+      <fieldset className="space-y-2">
+        <legend className="font-pixel text-pixel text-brass text-shadow-pixel">Line bonuses (points, 0 = none)</legend>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {(
+            [
+              ["bonusRow", "Each row", initial?.bonuses.row],
+              ["bonusColumn", "Each column", initial?.bonuses.column],
+              ["bonusDiagonal", "Each diagonal", initial?.bonuses.diagonal],
+              ["bonusBlackout", "Blackout", initial?.bonuses.blackout],
+            ] as const
+          ).map(([name, label, value]) => (
+            <label key={name} className="block">
+              <span className="font-pixel text-pixel text-limestone text-shadow-pixel">{label}</span>
+              <input type="number" name={name} min={0} max={10000} defaultValue={value ?? 0} className={inputClass} />
+            </label>
+          ))}
+        </div>
+        <p className="text-steel text-shadow-pixel">
+          A team gets a bonus once for each full row, column or diagonal it completes, and the blackout bonus for
+          completing every tile.
+        </p>
+      </fieldset>
       {sizeLocked && <p className="text-steel text-shadow-pixel">The size can only change while the board is a draft.</p>}
 
       {state?.error && (

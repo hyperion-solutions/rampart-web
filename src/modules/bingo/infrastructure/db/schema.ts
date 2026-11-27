@@ -28,6 +28,11 @@ export const bingoBoards = pgTable(
     startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
     endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
     status: boardStatus("status").notNull().default("draft"),
+    /** Bonus points per completed row, column and diagonal, and for completing every tile. */
+    bonusRow: integer("bonus_row").notNull().default(0),
+    bonusColumn: integer("bonus_column").notNull().default(0),
+    bonusDiagonal: integer("bonus_diagonal").notNull().default(0),
+    bonusBlackout: integer("bonus_blackout").notNull().default(0),
     createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
@@ -38,6 +43,10 @@ export const bingoBoards = pgTable(
   (t) => [
     check("bingo_boards_size", sql`${t.size} between 3 and 7`),
     check("bingo_boards_dates", sql`${t.endsAt} > ${t.startsAt}`),
+    check(
+      "bingo_boards_bonuses",
+      sql`${t.bonusRow} >= 0 and ${t.bonusColumn} >= 0 and ${t.bonusDiagonal} >= 0 and ${t.bonusBlackout} >= 0`,
+    ),
   ],
 );
 

@@ -57,18 +57,22 @@ export function BoardView({
   states,
   members,
   canEdit,
+  lineSquares,
 }: {
   boardId: string;
   size: number;
   tiles: readonly ViewTile[];
   team: { id: string; name: string } | null;
   states: Readonly<Record<string, ViewTileState>>;
+  /** Squares ("row:col") on a line the team completed: outlined in gold. */
+  lineSquares: readonly string[];
   members: readonly ViewTeamMember[];
   canEdit: boolean;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const byPosition = new Map(tiles.map((t) => [`${t.row}:${t.col}`, t]));
   const open = tiles.find((t) => t.id === openId);
+  const onLine = new Set(lineSquares);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
@@ -85,7 +89,9 @@ export function BoardView({
               onClick={() => setOpenId(tile.id)}
               aria-label={`${tile.name}, ${tile.points} points, ${state.complete ? "completed" : multi ? `${state.done} of ${tile.quantity}` : "not completed"}`}
               className={`relative flex aspect-square flex-col items-center justify-center gap-1 p-1 text-center shadow-[inset_0_0_0_4px] ${
-                state.complete ? "bg-gain/25 shadow-gain" : "bg-keep shadow-mortar hover:shadow-rune"
+                state.complete
+                  ? `bg-gain/25 ${onLine.has(`${tile.row}:${tile.col}`) ? "shadow-brass" : "shadow-gain"}`
+                  : "bg-keep shadow-mortar hover:shadow-rune"
               } ${openId === tile.id ? "outline-4 outline-brass" : ""}`}
             >
               {state.complete && (
