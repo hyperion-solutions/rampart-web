@@ -30,6 +30,8 @@ npm run db:migrate                           # apply migrations to your dev bran
 
 Production database values are marked sensitive in Vercel, so they can't be pulled to a laptop.
 
+Preview branches are deleted automatically when their PR is merged or closed (`.github/workflows/neon-preview-cleanup.yml`). It needs the `NEON_API_KEY` secret and the `NEON_PROJECT_ID` variable in the GitHub repo. Neon's free plan has a branch limit, so if previews fail with "Resource provisioning failed", delete old `preview/...` branches in the Neon console.
+
 Change the schema in `src/modules/<module>/infrastructure/db/schema.ts`, then run `npm run db:generate` and commit the new file in `drizzle/`. `npm run db:studio` opens a browser view of the data.
 
 ### Discord sign-in

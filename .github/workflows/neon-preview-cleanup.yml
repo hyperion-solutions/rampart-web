@@ -1,0 +1,47 @@
+name: Neon preview cleanup
+
+# Each Vercel preview gets its own Neon branch, named "preview/<git branch>".
+# Neon's free plan has a branch limit, so delete a PR's branch once the PR is merged or closed.
+#
+# pull_request_target runs with this repository's secrets (Dependabot PRs included) and
+# never checks out PR code, so it's safe here: it only calls the Neon API.
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions: {}
+
+jobs:
+  delete-branch:
+    name: Delete preview database branch
+    runs-on: ubuntu-latest
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+      BRANCH_NAME: preview/${{ github.event.pull_request.head.ref }}
+    steps:
+      - name: Delete the Neon branch for this PR
+        run: |
+          set -euo pipefail
+          if [ -z "${NEON_API_KEY}" ] || [ -z "${NEON_PROJECT_ID}" ]; then
+            echo "::warning::NEON_API_KEY secret or NEON_PROJECT_ID variable is missing; skipping."
+            exit 0
+          fi
+          case "${BRANCH_NAME}" in
+            preview/*) ;;
+            *) echo "::error::Refusing to delete ${BRANCH_NAME}: only preview/ branches"; exit 1 ;;
+          esac
+
+          api="https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}"
+          branches=$(curl -fsS -H "Authorization: Bearer ${NEON_API_KEY}" -H "Accept: application/json" "${api}/branches")
+          branch_id=$(jq -r --arg name "${BRANCH_NAME}" '.branches[] | select(.name == $name) | .id' <<<"${branches}")
+
+          if [ -z "${branch_id}" ]; then
+            echo "No Neon branch named ${BRANCH_NAME}; nothing to delete."
+            exit 0
+          fi
+
+          curl -fsS -X DELETE -H "Authorization: Bearer ${NEON_API_KEY}" -H "Accept: application/json" \
+            "${api}/branches/${branch_id}" >/dev/null
+          echo "Deleted Neon branch ${BRANCH_NAME} (${branch_id})."
