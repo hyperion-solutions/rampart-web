@@ -22,3 +22,15 @@ export const formatRelative = (date: Date, now: Date = new Date()) => {
   }
   return "just now";
 };
+
+/** "Dec 1, 2026, 18:00 UTC". Bingo times are shown in UTC so every member sees the same thing. */
+export const formatDateTime = (date: Date) =>
+  `${new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone: "UTC",
+  }).format(date)} UTC`;
