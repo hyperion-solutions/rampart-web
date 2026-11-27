@@ -1,22 +1,40 @@
 import "server-only";
-import type { ClanMembershipChecker } from "../../domain/clan-membership";
+import type { ClanMembership, ClanMembershipChecker } from "../../domain/clan-membership";
 
 const DISCORD_API = "https://discord.com/api/v10";
 
+interface DiscordGuildMember {
+  roles: string[];
+}
+
 /**
- * Adapter: checks membership with the signed-in user's token
+ * Adapter: reads the signed-in user's server membership and roles with their own token
  * (OAuth scope `guilds.members.read`). Discord answers 404 when they aren't in the server.
  */
 export class DiscordGuildMembership implements ClanMembershipChecker {
-  constructor(private readonly guildId: string) {}
+  /**
+   * @param rankRoles rank name to role id, ordered lowest to highest rank;
+   *   the highest one the member holds is reported as their rank.
+   */
+  constructor(
+    private readonly guildId: string,
+    private readonly rankRoles: Readonly<Record<string, string>>,
+  ) {}
 
-  async isMember(discordAccessToken: string): Promise<boolean> {
+  async check(discordAccessToken: string): Promise<ClanMembership> {
     const res = await fetch(`${DISCORD_API}/users/@me/guilds/${this.guildId}/member`, {
       headers: { Authorization: `Bearer ${discordAccessToken}` },
       cache: "no-store",
     });
-    if (res.status === 404) return false;
+    if (res.status === 404) return { status: "not-in-server" };
     if (!res.ok) throw new Error(`Discord membership check failed (${res.status}) for server ${this.guildId}`);
-    return true;
+
+    const { roles } = (await res.json()) as DiscordGuildMember;
+    const held = new Set(roles);
+    const rank = Object.entries(this.rankRoles)
+      .filter(([, roleId]) => held.has(roleId))
+      .map(([name]) => name)
+      .at(-1);
+    return rank ? { status: "ranked", rank } : { status: "no-rank" };
   }
 }

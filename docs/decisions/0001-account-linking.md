@@ -15,20 +15,22 @@ Members want to sign in to the site and connect their OSRS accounts (RSNs), so t
 
 ## Decision
 
-1. **Identity is a Discord account.** Members sign in with Discord (Auth.js). Only members of the Rampart Discord server can sign in.
+1. **Identity is a Discord account.** Members sign in with Discord (Auth.js). Only members of the Rampart Discord server **with a clan rank role** (Recruit up to Leader, listed in `src/shared/config/site.ts`) can sign in. Members without a rank are sent to the rank-request channel. Ranks are checked again at least once a day, and sessions last 7 days (the life of the Discord token), so losing a rank or leaving the server ends access quickly. *(Amended 2026-11-27, #37.)*
 2. **RSN ownership is proven through Dink.**
    - A signed-in member creates a personal webhook URL on the site: `/api/dink/<token>`.
    - They paste it into Dink under **Advanced** (custom webhook) and log in to the game.
    - Dink posts a `LOGIN` notification. The site finds the user by the token and links `dinkAccountHash` and `playerName` to them, then resolves the Wise Old Man player id.
    - Only someone logged in to that game account can produce this, so it proves control without passwords or codes.
-3. **Manual fallback.** Members who don't use Dink can submit a claim, which a Rampart admin (Discord role) approves.
-4. **No custom RuneLite plugin for now.** We revisit this for bingo in v0.3 (#32), alongside the "Bingo with Dink Notifications" plugin.
+3. **Clan accounts only.** An RSN is linked only if it's in the Rampart clan (Wise Old Man group; Dink's `clanName` when present). One member can link several clan accounts. *(Amended 2026-11-27, #27.)*
+4. **Manual fallback.** Members who don't use Dink can submit a claim, which a Rampart admin (Discord role) approves.
+5. **No custom RuneLite plugin for now.** We revisit this for bingo in v0.3 (#32), alongside the "Bingo with Dink Notifications" plugin.
 
 ## What we store
 
 | Data | Why |
 | --- | --- |
 | Discord id, username, avatar | Identity and display |
+| Clan rank, Discord access token | Only inside the encrypted session cookie, to re-check the rank daily; not in the database |
 | Link token (hashed only) | Matching Dink requests to a member; revocable |
 | `dinkAccountHash` | Stable account identity across name changes |
 | RSN, account type | Display, matching to Wise Old Man |

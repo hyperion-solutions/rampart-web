@@ -3,10 +3,10 @@ import type { DiscordProfile, User } from "../domain/user";
 import type { UserRepository } from "../domain/user-repository";
 
 export type SignInResult =
-  | { readonly ok: true; readonly user: User }
-  | { readonly ok: false; readonly reason: "not-a-member" };
+  | { readonly ok: true; readonly user: User; readonly rank: string }
+  | { readonly ok: false; readonly reason: "not-in-server" | "no-rank" };
 
-/** Lets Rampart Discord members in, and records who they are. */
+/** Lets ranked Rampart members in, and records who they are. */
 export class SignInWithDiscord {
   constructor(
     private readonly membership: ClanMembershipChecker,
@@ -14,9 +14,8 @@ export class SignInWithDiscord {
   ) {}
 
   async execute(profile: DiscordProfile, discordAccessToken: string): Promise<SignInResult> {
-    if (!(await this.membership.isMember(discordAccessToken))) {
-      return { ok: false, reason: "not-a-member" };
-    }
-    return { ok: true, user: await this.users.upsertFromDiscord(profile) };
+    const membership = await this.membership.check(discordAccessToken);
+    if (membership.status !== "ranked") return { ok: false, reason: membership.status };
+    return { ok: true, user: await this.users.upsertFromDiscord(profile), rank: membership.rank };
   }
 }

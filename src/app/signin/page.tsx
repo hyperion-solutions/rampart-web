@@ -1,12 +1,16 @@
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/composition/auth";
 import { DiscordButton } from "@/shared/ui/discord-button";
+import { site } from "@/shared/config/site";
 import { DiscordIcon } from "@/shared/ui/discord-icon";
 
 export const metadata = { title: "Sign in | Rampart" };
 
+const RANK_REQUEST_URL = `https://discord.com/channels/${site.discordGuildId}/${site.rankRequestChannelId}`;
+
 const ERRORS: Readonly<Record<string, string>> = {
-  "not-a-member": "Only members of the Rampart Discord can sign in. Join the server, then try again.",
+  "not-in-server": "Only Rampart clan members can sign in. Join the Discord, then try again.",
+  "no-rank": "You need a clan rank to sign in. Ask for one in the rank-request channel, then sign in again once you have it.",
   AccessDenied: "Sign-in was cancelled. Try again when you're ready.",
 };
 const GENERIC_ERROR = "Sign-in didn't work. Try again, and tell an admin on Discord if it keeps happening.";
@@ -35,7 +39,7 @@ export default async function SignInPage({
       <div className="pixel-box p-8 text-center">
         <h1 className="font-quill text-pixel-2x text-lightning text-shadow-pixel">Sign in</h1>
         <p className="mt-3 text-steel text-shadow-pixel">
-          Sign in with the Discord account you use in the Rampart server.
+          Sign in with the Discord account you use in the Rampart server. You need a clan rank.
         </p>
 
         {error && (
@@ -51,14 +55,28 @@ export default async function SignInPage({
           </button>
         </form>
 
-        {error === "not-a-member" && (
+        {error === "not-in-server" && (
           <div className="mt-4">
             <DiscordButton />
           </div>
         )}
 
+        {error === "no-rank" && (
+          <div className="mt-4">
+            <a
+              href={RANK_REQUEST_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pixel-btn inline-flex items-center gap-2 bg-granite text-brass"
+            >
+              <DiscordIcon className="size-5 drop-shadow-[2px_2px_0_#000]" />
+              Request a rank
+            </a>
+          </div>
+        )}
+
         <p className="mt-8 text-steel text-shadow-pixel">
-          We only ask Discord for your name, avatar and whether you&apos;re in the Rampart server. We never see
+          We only ask Discord for your name, avatar and your roles in the Rampart server. We never see
           your email or password.
         </p>
       </div>
