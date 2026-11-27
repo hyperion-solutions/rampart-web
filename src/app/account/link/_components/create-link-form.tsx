@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { createLink, type CreateLinkState } from "../actions";
 import { CopyButton } from "./copy-button";
 
@@ -8,8 +8,12 @@ import { CopyButton } from "./copy-button";
  * Creates a Dink link and shows the full address once. After leaving the page it can't be shown
  * again (only a hash is stored), so members make a new link if they lose it.
  */
-export function CreateLinkForm({ hasLink }: { hasLink: boolean }) {
+export function CreateLinkForm({ hasLink, onCreated }: { hasLink: boolean; onCreated?: (url: string) => void }) {
   const [state, action, pending] = useActionState<CreateLinkState, FormData>(createLink, null);
+
+  useEffect(() => {
+    if (state) onCreated?.(state.url);
+  }, [state, onCreated]);
 
   if (state) {
     return (
