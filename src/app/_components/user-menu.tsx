@@ -46,7 +46,7 @@ export function UserMenu() {
 
   if (!session?.user) {
     return (
-      <Link href="/signin" className="pixel-btn ml-1 bg-granite px-3 py-1.5 text-brass">
+      <Link href="/signin" className="pixel-btn ml-1 whitespace-nowrap bg-granite px-2 py-1.5 text-brass sm:px-3">
         Sign in
       </Link>
     );

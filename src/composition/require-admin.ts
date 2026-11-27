@@ -19,3 +19,10 @@ export async function getAdmin(): Promise<Session["user"] | null> {
   const session = await auth();
   return session?.user?.id && session.user.isAdmin ? session.user : null;
 }
+
+/** For member pages: signed-out visitors go to sign in. */
+export async function requireMember(callbackUrl: string): Promise<Session["user"]> {
+  const session = await auth();
+  if (!session?.user?.id) redirect(`/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+  return session.user;
+}

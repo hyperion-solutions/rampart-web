@@ -37,6 +37,7 @@ import { HttpItemSourceReader } from "@/modules/items/infrastructure/sources/htt
 import { ChangeBoardStatus } from "@/modules/bingo/application/change-board-status";
 import { AddTeamMember, CreateTeam, GetPlayers, RemoveTeam, RemoveTeamMember, SearchPlayers } from "@/modules/bingo/application/manage-teams";
 import { DrizzlePlayerDirectory } from "@/modules/bingo/infrastructure/db/drizzle-player-directory";
+import { MarkTileComplete, UndoTileCompletion } from "@/modules/bingo/application/mark-completions";
 import { ClearTile } from "@/modules/bingo/application/clear-tile";
 import { CreateBoard } from "@/modules/bingo/application/create-board";
 import { GetBoardOverview } from "@/modules/bingo/application/get-board-overview";
@@ -110,6 +111,8 @@ export function createContainer() {
       removeTeamMember: new RemoveTeamMember(bingoBoards, bingoTeams),
       searchPlayers: new SearchPlayers(bingoPlayers),
       getPlayers: new GetPlayers(bingoPlayers),
+      markTileComplete: new MarkTileComplete(bingoBoards, bingoTeams, bingoTiles, bingoCompletions),
+      undoTileCompletion: new UndoTileCompletion(bingoBoards, bingoTeams, bingoTiles, bingoCompletions),
     },
     unlinkAccount: new UnlinkAccount(linkedAccounts),
     /** Turns a Dink HTTP request into a domain notification (adapter). */
