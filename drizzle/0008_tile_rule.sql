@@ -1,0 +1,2 @@
+ALTER TABLE "bingo_tiles" ADD COLUMN "rule" text DEFAULT 'any' NOT NULL;--> statement-breakpoint
+ALTER TABLE "bingo_tiles" ADD CONSTRAINT "bingo_tiles_rule" CHECK ("bingo_tiles"."rule" in ('any', 'all'));

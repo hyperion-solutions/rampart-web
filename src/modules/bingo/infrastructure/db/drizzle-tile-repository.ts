@@ -1,11 +1,14 @@
 import "server-only";
 import { and, eq, gte, inArray, or } from "drizzle-orm";
 import type { TileRepository } from "../../domain/repositories";
-import type { Tile, TileInput } from "../../domain/tile";
+import { type Tile, type TileInput, type TileRule, TILE_RULES } from "../../domain/tile";
 import type { BingoDb } from "./client";
 import { bingoTileItems, bingoTiles } from "./schema";
 
 type TileRow = typeof bingoTiles.$inferSelect;
+
+/** The column has a check constraint; anything else would be a bug, so fall back to the old behaviour. */
+const toRule = (value: string): TileRule => TILE_RULES.find((r) => r === value) ?? "any";
 
 const toTile = (r: TileRow, itemIds: number[]): Tile => ({
   id: r.id,
@@ -15,6 +18,7 @@ const toTile = (r: TileRow, itemIds: number[]): Tile => ({
   name: r.name,
   points: r.points,
   quantity: r.quantity,
+  rule: toRule(r.rule),
   description: r.description,
   iconItemId: r.iconItemId,
   itemIds,
@@ -48,6 +52,7 @@ export class DrizzleTileRepository implements TileRepository {
           name: fields.name,
           points: fields.points,
           quantity: fields.quantity,
+          rule: fields.rule,
           description: fields.description,
           iconItemId: fields.iconItemId,
         },

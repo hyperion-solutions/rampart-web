@@ -29,7 +29,8 @@ export interface AddProgressInput {
 
 /**
  * Adds drops to a tile for a team (by hand now, from Dink in #32). The tile completes when the
- * total reaches its quantity and is locked after that; the member whose drop finished it is recorded.
+ * total reaches its quantity ("any" tiles) or every item is in ("all" tiles), and is locked after
+ * that; the member whose drop finished it is recorded.
  */
 export class AddTileProgress {
   constructor(
@@ -44,7 +45,7 @@ export class AddTileProgress {
   async execute(
     input: AddProgressInput,
     now: Date = new Date(),
-  ): Promise<Result<{ done: number; quantity: number; complete: boolean }>> {
+  ): Promise<Result<{ done: number; target: number; complete: boolean }>> {
     const board = await this.boards.findById(input.boardId);
     if (!board) return fail("That board doesn't exist.");
     if (board.status !== "live") return fail("Drops can only be added while the board is live.");
@@ -80,10 +81,15 @@ export class AddTileProgress {
       this.progress.listFor(input.teamId, input.tileId),
       this.completions.listForBoard(input.boardId).then((cs) => cs.some((c) => c.teamId === input.teamId && c.tileId === input.tileId)),
     ]);
-    const before = tileProgress(tile.quantity, entries, completed);
+    const before = tileProgress(tile, entries, completed);
     if (before.complete) return fail("This tile is already complete for the team.");
+    if (tile.rule === "all") {
+      // Each item counts once, so the item is required and can't repeat.
+      if (input.itemId === null) return fail("Pick which item they got.");
+      if (before.obtainedItemIds.includes(input.itemId)) return fail("The team already has that item for this tile.");
+    }
 
-    const amount = Math.min(input.amount, before.remaining);
+    const amount = tile.rule === "all" ? 1 : Math.min(input.amount, before.remaining);
     const note = input.note?.trim().slice(0, 300) || null;
     const addedBy = input.actor?.userId ?? null;
     await this.progress.add({
@@ -98,7 +104,7 @@ export class AddTileProgress {
       note,
     });
 
-    const after = tileProgress(tile.quantity, [...entries, { amount }], false);
+    const after = tileProgress(tile, [...entries, { amount, itemId: input.itemId }], false);
     if (after.complete) {
       await this.completions.mark({
         teamId: input.teamId,
@@ -110,7 +116,7 @@ export class AddTileProgress {
         completedRsn: input.obtainedRsn,
       });
     }
-    return ok({ done: after.done, quantity: tile.quantity, complete: after.complete });
+    return ok({ done: after.done, target: after.target, complete: after.complete });
   }
 }
 
@@ -136,8 +142,8 @@ export class UndoLastProgress {
 
     const removed = await this.progress.removeLast(input.teamId, input.tileId);
     const entries = await this.progress.listFor(input.teamId, input.tileId);
-    // Below the quantity again (or a completion marked before progress existed): reopen.
-    if (!removed || tileProgress(tile.quantity, entries, false).done < tile.quantity) {
+    // Below the target again (or a completion marked before progress existed): reopen.
+    if (!removed || !tileProgress(tile, entries, false).complete) {
       await this.completions.unmark(input.teamId, input.tileId);
     }
     return ok(null);

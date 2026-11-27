@@ -65,12 +65,13 @@ export default async function BingoBoardPage({
     tiles.map((t) => {
       const completion = completions.find((c) => c.teamId === selectedTeam?.id && c.tileId === t.id);
       const entries = progress.filter((p) => p.teamId === selectedTeam?.id && p.tileId === t.id);
-      const { done, complete } = tileProgress(t.quantity, entries, completion !== undefined);
+      const { done, complete, obtainedItemIds } = tileProgress(t, entries, completion !== undefined);
       return [
         t.id,
         {
           done,
           complete,
+          obtainedItemIds,
           completedAt: completion?.completedAt.toISOString() ?? null,
           completedByName: completion?.completedByName ?? null,
           completedRsn: completion?.completedRsn ?? null,
@@ -210,6 +211,7 @@ export default async function BingoBoardPage({
             name: t.name,
             points: t.points,
             quantity: t.quantity,
+            rule: t.rule,
             description: t.description,
             icon: (t.iconItemId !== null ? items.get(t.iconItemId) : undefined) ?? null,
             items: t.itemIds.flatMap((id) => {

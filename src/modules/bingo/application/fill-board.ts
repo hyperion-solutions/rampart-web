@@ -43,6 +43,7 @@ export class FillBoardRandomly {
           name: item.name.slice(0, 60),
           points: RANDOM_TILE_POINTS,
           quantity: 1,
+          rule: "any",
           description: null,
           iconItemId: item.id,
           itemIds: [item.id],

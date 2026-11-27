@@ -11,6 +11,8 @@ export interface EditorTile {
   readonly name: string;
   readonly points: number;
   readonly quantity: number;
+  /** "any": any items count toward the quantity; "all": every item is needed once. */
+  readonly rule: "any" | "all";
   readonly description: string | null;
   readonly iconItemId: number | null;
   readonly itemIds: readonly number[];
@@ -94,7 +96,8 @@ export function BoardEditor({
                     {tile.name}
                   </span>
                   <span className="font-pixel text-pixel text-gain text-shadow-pixel">
-                    {tile.points} pts{tile.quantity > 1 ? ` · x${tile.quantity}` : ""}
+                    {tile.points} pts
+                    {tile.rule === "all" ? ` · all ${tile.itemIds.length}` : tile.quantity > 1 ? ` · x${tile.quantity}` : ""}
                   </span>
                 </>
               ) : (
@@ -174,6 +177,9 @@ function TilePanel({
   const [name, setName] = useState(tile?.name ?? "");
   const [points, setPoints] = useState(String(tile?.points ?? 10));
   const [quantity, setQuantity] = useState(String(tile?.quantity ?? 1));
+  const [rule, setRule] = useState<"any" | "all">(tile?.rule ?? "any");
+  // "All of these" only makes sense with two or more items.
+  const needsAll = rule === "all" && picked.length >= 2;
   const [description, setDescription] = useState(tile?.description ?? "");
 
   function onItemsChange(next: PickedItem[]) {
@@ -189,7 +195,8 @@ function TilePanel({
         col,
         name,
         points: Number(points),
-        quantity: Number(quantity),
+        quantity: needsAll ? 1 : Number(quantity),
+        rule: needsAll ? "all" : "any",
         description: description.trim() || null,
         iconItemId: icon[0]?.id ?? picked[0]?.id ?? null,
         itemIds: picked.map((i) => i.id),
@@ -226,7 +233,7 @@ function TilePanel({
 
       <fieldset disabled={readOnly || pending} className="space-y-4">
         <div>
-          <p className="font-pixel text-pixel text-limestone text-shadow-pixel">Items (any one completes it)</p>
+          <p className="font-pixel text-pixel text-limestone text-shadow-pixel">Items</p>
           <p className="mb-2 text-steel text-shadow-pixel">Leave empty for a goal like &ldquo;99 Runecraft&rdquo;.</p>
           <ItemPicker value={picked} onChange={onItemsChange} />
         </div>
@@ -236,15 +243,51 @@ function TilePanel({
           <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} className={inputClass} />
         </label>
 
+        {picked.length >= 2 && (
+          <fieldset>
+            <legend className="font-pixel text-pixel text-limestone text-shadow-pixel">Counts as</legend>
+            <div className="mt-1 space-y-1">
+              {(
+                [
+                  ["any", "Any of these", "Drops of any listed item count toward the quantity."],
+                  ["all", "All of these", "Each listed item is needed once, e.g. both crowns for a Twinflame."],
+                ] as const
+              ).map(([value, label, hint]) => (
+                <label key={value} className="flex cursor-pointer items-start gap-2">
+                  <input
+                    type="radio"
+                    name={`rule-${row}-${col}`}
+                    value={value}
+                    checked={rule === value}
+                    onChange={() => setRule(value)}
+                    className="mt-1 accent-rune"
+                  />
+                  <span>
+                    <span className="block font-pixel text-pixel text-limestone text-shadow-pixel">{label}</span>
+                    <span className="block text-steel text-shadow-pixel">{hint}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
+
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className="font-pixel text-pixel text-limestone text-shadow-pixel">Points</span>
             <input type="number" min={0} max={1000} value={points} onChange={(e) => setPoints(e.target.value)} className={inputClass} />
           </label>
-          <label className="block">
-            <span className="font-pixel text-pixel text-limestone text-shadow-pixel">Quantity</span>
-            <input type="number" min={1} max={1000} value={quantity} onChange={(e) => setQuantity(e.target.value)} className={inputClass} />
-          </label>
+          {needsAll ? (
+            <div>
+              <span className="font-pixel text-pixel text-limestone text-shadow-pixel">Quantity</span>
+              <p className="mt-1 py-2 text-steel text-shadow-pixel">1 of each ({picked.length} items)</p>
+            </div>
+          ) : (
+            <label className="block">
+              <span className="font-pixel text-pixel text-limestone text-shadow-pixel">Quantity</span>
+              <input type="number" min={1} max={1000} value={quantity} onChange={(e) => setQuantity(e.target.value)} className={inputClass} />
+            </label>
+          )}
         </div>
 
         <label className="block">
