@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { ItemIcon, type PickedItem } from "@/app/_components/item-picker";
 import { addDropAction, undoLastDropAction } from "../actions";
 
@@ -76,14 +76,36 @@ export function BoardView({
   const byPosition = new Map(tiles.map((t) => [`${t.row}:${t.col}`, t]));
   const open = tiles.find((t) => t.id === openId);
   const onLine = new Set(lineSquares);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Clicking outside the grid and the panel, or pressing Escape, deselects the tile.
+  useEffect(() => {
+    if (openId === null) return;
+    const inside = (target: EventTarget | null) =>
+      target instanceof Node && (gridRef.current?.contains(target) || panelRef.current?.contains(target));
+    const onPointerDown = (e: PointerEvent) => {
+      if (!inside(e.target)) setOpenId(null);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenId(null);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [openId]);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}>
+      <div ref={gridRef} className="grid gap-2" style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}>
         {Array.from({ length: size * size }, (_, i) => {
           const tile = byPosition.get(`${Math.floor(i / size)}:${i % size}`);
           if (!tile) return <div key={i} className="aspect-square bg-obsidian/40" aria-hidden />;
           const state = states[tile.id] ?? EMPTY;
+          const glowing = state.complete && onLine.has(`${tile.row}:${tile.col}`);
           const multi = tile.quantity > 1;
           return (
             <button
@@ -91,9 +113,11 @@ export function BoardView({
               type="button"
               onClick={() => setOpenId(tile.id)}
               aria-label={`${tile.name}, ${tile.points} points, ${state.complete ? "completed" : multi ? `${state.done} of ${tile.quantity}` : "not completed"}`}
+              // Completed lines glow in a wave: each square starts a little later, from the top-left.
+              style={glowing ? { animationDelay: `${(tile.row + tile.col) * 0.15}s` } : undefined}
               className={`relative flex aspect-square flex-col items-center justify-center gap-1 p-1 text-center shadow-[inset_0_0_0_4px] ${
                 state.complete
-                  ? `bg-gain/25 ${onLine.has(`${tile.row}:${tile.col}`) ? "shadow-brass" : "shadow-gain"}`
+                  ? `bg-gain/25 ${glowing ? "line-glow shadow-brass" : "shadow-gain"}`
                   : "bg-keep shadow-mortar hover:shadow-rune"
               } ${openId === tile.id ? "outline-4 outline-brass" : ""}`}
             >
@@ -121,7 +145,7 @@ export function BoardView({
         })}
       </div>
 
-      <div className="pixel-box h-fit p-5">
+      <div ref={panelRef} className="pixel-box h-fit p-5">
         {open ? (
           <TileDetails
             key={open.id}

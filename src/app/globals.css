@@ -110,3 +110,16 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .blink { animation: none; }
 }
+
+/*
+ * Completed bingo line: a gold glow that ripples along the line (each square gets an
+ * animation-delay). The one soft effect besides the crest glow. Off for reduced motion.
+ */
+@keyframes line-glow {
+  0%, 100% { box-shadow: inset 0 0 0 4px var(--color-brass), 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 0 4px var(--color-brass), 0 0 18px 4px color-mix(in srgb, var(--color-brass) 70%, transparent); }
+}
+.line-glow { animation: line-glow 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .line-glow { animation: none; }
+}

@@ -49,14 +49,14 @@ Dependency rule: app -> application -> domain, and infrastructure -> domain. Dom
 6. Add a route under `src/app/events/`.
 
 ## Design tokens
-The look is 8-bit, like the OSRS interface: pixel fonts, hard 2px text shadows, notched pixel borders. The only soft effect is the blue glow behind the hero crest.
+The look is 8-bit, like the OSRS interface: pixel fonts, hard 2px text shadows, notched pixel borders. Soft effects are limited to two: the blue glow behind the hero crest, and the gold wave glow on completed bingo lines (`.line-glow`). Animations switch off for reduced motion.
 Colours are defined in `src/app/globals.css` (`@theme`), taken from the clan crest: obsidian, keep, granite, mortar, steel, limestone, rune, lightning, banner, brass, gain. Use tokens, not raw hex.
 Fonts are the OSRS bitmap fonts in `src/shared/fonts/` (loaded once via `next/font/local`, exported from `index.ts`):
 - `font-body` RuneScape Plain 12: paragraphs.
 - `font-pixel` RuneScape Bold 12: labels, buttons, stats, player names.
 - `font-quill` RuneScape Quill 8: headings and the wordmark.
 Only use `text-pixel` (16px), `text-pixel-2x` (32px) and `text-pixel-3x` (48px); other sizes blur bitmap fonts.
-Utilities: `.pixel-box` (notched, bevelled panel), `.pixel-btn` (button that presses in), `.text-shadow-pixel`, `.storm` (glow behind the crest), `.crest` (blends the crest's black background into the page). Use the full-quality crest `public/brand/rampart-crest.webp`; don't pixelate it.
+Utilities: `.pixel-box` (notched, bevelled panel), `.pixel-btn` (button that presses in), `.text-shadow-pixel`, `.storm` (glow behind the crest), `.line-glow` (completed bingo line), `.blink` (urgent countdown), `.crest` (blends the crest's black background into the page). Use the full-quality crest `public/brand/rampart-crest.webp`; don't pixelate it.
 
 ## Decisions
 Significant choices are recorded in `docs/decisions/NNNN-title.md` (context, decision, consequences). Read them before changing related code, and add one when making a new significant choice.
