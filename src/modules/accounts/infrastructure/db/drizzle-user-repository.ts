@@ -31,6 +31,11 @@ export class DrizzleUserRepository implements UserRepository {
     return toUser(row);
   }
 
+  async exists(userId: string): Promise<boolean> {
+    const rows = await this.db().select({ id: users.id }).from(users).where(eq(users.id, userId)).limit(1);
+    return rows.length > 0;
+  }
+
   async delete(userId: string): Promise<void> {
     // linked_accounts and link_tokens reference users with ON DELETE CASCADE.
     await this.db().delete(users).where(eq(users.id, userId));
