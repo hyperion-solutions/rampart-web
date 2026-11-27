@@ -10,7 +10,7 @@ export interface PickedItem {
 }
 
 /** RuneLite item icons are 36x32 pixel art; show them at native size. */
-function ItemIcon({ item }: { item: PickedItem }) {
+export function ItemIcon({ item }: { item: PickedItem }) {
   return <Image src={item.iconUrl} alt="" width={36} height={32} quality={100} className="pixelated shrink-0" />;
 }
 

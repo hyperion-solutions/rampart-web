@@ -27,6 +27,7 @@ import { getAccountsDb } from "@/modules/accounts/infrastructure/db/client";
 import { DrizzleUserRepository } from "@/modules/accounts/infrastructure/db/drizzle-user-repository";
 import { readDinkNotification } from "@/modules/accounts/infrastructure/dink/read-dink-notification";
 import { DiscordGuildMembership } from "@/modules/accounts/infrastructure/discord/discord-guild-membership";
+import { GetItems } from "@/modules/items/application/get-items";
 import { SearchItems } from "@/modules/items/application/search-items";
 import { DrizzleItemSearchRepository } from "@/modules/items/infrastructure/db/drizzle-item-search-repository";
 import { ImportItemCatalog } from "@/modules/items/application/import-item-catalog";
@@ -57,6 +58,7 @@ export function createContainer() {
   const linkTokens = new DrizzleLinkTokenRepository(getAccountsDb);
   const linkedAccounts = new DrizzleLinkedAccountRepository(getAccountsDb);
   const clanRoster = new ClanRosterDirectory(clanRepository);
+  const itemSearch = new DrizzleItemSearchRepository(getItemsDb);
   const linkClaims = new DrizzleLinkClaimRepository(getAccountsDb);
   const bingoBoards = new DrizzleBoardRepository(getBingoDb);
   const bingoTiles = new DrizzleTileRepository(getBingoDb);
@@ -70,7 +72,8 @@ export function createContainer() {
       new HttpItemSourceReader("rampart-web item catalog (OSRS clan website)"),
       new DrizzleItemCatalogRepository(getItemsDb),
     ),
-    searchItems: new SearchItems(new DrizzleItemSearchRepository(getItemsDb)),
+    searchItems: new SearchItems(itemSearch),
+    getItems: new GetItems(itemSearch),
     signInWithDiscord: new SignInWithDiscord(clanMembership, users),
     deleteMyAccount: new DeleteMyAccount(users),
     checkClanMembership: new CheckClanMembership(clanMembership),

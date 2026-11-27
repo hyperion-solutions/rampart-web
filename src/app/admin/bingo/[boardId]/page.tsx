@@ -7,6 +7,7 @@ import { SectionHeading } from "@/shared/ui/section-heading";
 import { changeBoardStatusAction, updateBoardAction } from "../actions";
 import { BoardForm } from "../_components/board-form";
 import { StatusBadge } from "../_components/status-badge";
+import { BoardEditor } from "./board-editor";
 
 export const metadata = { title: "Bingo board | Rampart" };
 export const dynamic = "force-dynamic";
@@ -26,6 +27,8 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
   const overview = await container.bingo.getBoardOverview.execute(boardId, { includeDrafts: true }).catch(() => null);
   if (!overview) notFound();
   const { board, tiles, maxPoints } = overview;
+  const itemIds = tiles.flatMap((t) => [...t.itemIds, ...(t.iconItemId === null ? [] : [t.iconItemId])]);
+  const items = Object.fromEntries((await container.getItems.execute(itemIds)).map((i) => [i.id, i]));
 
   return (
     <section className="mx-auto max-w-5xl space-y-8">
@@ -61,8 +64,23 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
       </div>
 
       <div className="pixel-box p-6" id="board-editor">
-        <h2 className="font-pixel text-pixel text-brass text-shadow-pixel">Squares</h2>
-        <p className="mt-2 text-steel text-shadow-pixel">The board editor is coming next (#56).</p>
+        <h2 className="mb-4 font-pixel text-pixel text-brass text-shadow-pixel">Squares</h2>
+        <BoardEditor
+          boardId={board.id}
+          size={board.size}
+          readOnly={board.status === "finished"}
+          items={items}
+          tiles={tiles.map((t) => ({
+            row: t.row,
+            col: t.col,
+            name: t.name,
+            points: t.points,
+            quantity: t.quantity,
+            description: t.description,
+            iconItemId: t.iconItemId,
+            itemIds: t.itemIds,
+          }))}
+        />
       </div>
 
       {board.status !== "finished" && (
