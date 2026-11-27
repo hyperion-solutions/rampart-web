@@ -25,6 +25,8 @@ export interface ViewEntry {
   readonly obtainedRsn: string | null;
   readonly source: "admin" | "dink";
   readonly addedByName: string | null;
+  /** Added by the team's (current) captain, not an admin. */
+  readonly addedByCaptain: boolean;
   readonly note: string | null;
   /** ISO timestamp. */
   readonly addedAt: string;
@@ -306,7 +308,7 @@ function TileDetails({
                   <span className="font-pixel text-pixel text-limestone">{who(e.obtainedByName, e.obtainedRsn)}</span>{" "}
                   <span className="text-steel">
                     got {e.amount > 1 ? `${e.amount}× ` : ""}
-                    {e.itemName ?? "it"} · {e.source === "dink" ? "Dink" : `added by ${e.addedByName ?? "an admin"}`} ·{" "}
+                    {e.itemName ?? "it"} · {e.source === "dink" ? "Dink" : `added by ${e.addedByName ?? "an admin"}${e.addedByCaptain ? " (captain)" : ""}`} ·{" "}
                     {new Date(e.addedAt).toLocaleString()}
                   </span>
                   {e.note && <span className="block text-steel">{linkify(e.note)}</span>}

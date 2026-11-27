@@ -35,7 +35,15 @@ import { getItemsDb } from "@/modules/items/infrastructure/db/client";
 import { DrizzleItemCatalogRepository } from "@/modules/items/infrastructure/db/drizzle-item-catalog-repository";
 import { HttpItemSourceReader } from "@/modules/items/infrastructure/sources/http-item-source-reader";
 import { ChangeBoardStatus } from "@/modules/bingo/application/change-board-status";
-import { AddTeamMember, CreateTeam, GetPlayers, RemoveTeam, RemoveTeamMember, SearchPlayers } from "@/modules/bingo/application/manage-teams";
+import {
+  AddTeamMember,
+  CreateTeam,
+  GetPlayers,
+  RemoveTeam,
+  RemoveTeamMember,
+  SearchPlayers,
+  SetTeamCaptain,
+} from "@/modules/bingo/application/manage-teams";
 import { DrizzlePlayerDirectory } from "@/modules/bingo/infrastructure/db/drizzle-player-directory";
 import { AddTileProgress, ForgetBingoPlayer, UndoLastProgress } from "@/modules/bingo/application/tile-progress";
 import { DrizzleProgressRepository } from "@/modules/bingo/infrastructure/db/drizzle-progress-repository";
@@ -114,7 +122,8 @@ export function createContainer() {
       searchPlayers: new SearchPlayers(bingoPlayers),
       getPlayers: new GetPlayers(bingoPlayers),
       addTileProgress: new AddTileProgress(bingoBoards, bingoTiles, bingoTeams, bingoProgress, bingoCompletions, bingoPlayers),
-      undoLastProgress: new UndoLastProgress(bingoBoards, bingoTiles, bingoProgress, bingoCompletions),
+      undoLastProgress: new UndoLastProgress(bingoBoards, bingoTiles, bingoTeams, bingoProgress, bingoCompletions),
+      setTeamCaptain: new SetTeamCaptain(bingoBoards, bingoTeams),
       forgetPlayer: new ForgetBingoPlayer(bingoProgress),
     },
     unlinkAccount: new UnlinkAccount(linkedAccounts),

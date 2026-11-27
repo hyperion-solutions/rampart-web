@@ -94,6 +94,8 @@ export const bingoTeams = pgTable(
       .references(() => bingoBoards.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     colour: text("colour"),
+    /** Can add drops for this team. Must be one of its members; cleared when they leave or delete their data. */
+    captainUserId: uuid("captain_user_id").references(() => users.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [unique("bingo_teams_name").on(t.boardId, t.name)],

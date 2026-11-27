@@ -82,6 +82,7 @@ export default async function BingoBoardPage({
             obtainedRsn: e.obtainedRsn,
             source: e.source,
             addedByName: e.addedByName,
+            addedByCaptain: e.addedBy !== null && e.addedBy === selectedTeam?.captainUserId,
             note: e.note,
             addedAt: e.addedAt.toISOString(),
           })),
@@ -148,6 +149,12 @@ export default async function BingoBoardPage({
                   <span className="flex-1 font-pixel text-pixel text-limestone text-shadow-pixel">
                     {s.team.name}
                     {s.team.id === myTeamId && <span className="text-brass"> (your team)</span>}
+                    {s.team.captainUserId && (
+                      <span className="hidden text-steel md:inline">
+                        {" "}
+                        · ★ {members.find((m) => m.userId === s.team.captainUserId)?.displayName ?? "Captain"}
+                      </span>
+                    )}
                   </span>
                   <span className="hidden text-steel sm:inline">
                     {s.tilesCompleted} tiles
@@ -167,6 +174,13 @@ export default async function BingoBoardPage({
         {selectedTeam && (
           <p className="font-pixel text-pixel text-limestone text-shadow-pixel">
             Showing <span className="text-brass">{selectedTeam.name}</span>
+            {selectedTeam.captainUserId && (
+              <span className="text-limestone">
+                {" "}
+                · Captain ★ {members.find((m) => m.userId === selectedTeam.captainUserId)?.displayName}
+                {selectedTeam.captainUserId === user.id && " (you can add drops for your team)"}
+              </span>
+            )}
             <span className="text-steel">
               {" "}
               ({members.filter((m) => m.teamId === selectedTeam.id).map((m) => m.displayName).join(", ") || "no members yet"})
@@ -183,7 +197,11 @@ export default async function BingoBoardPage({
             board.size,
           )}
           members={teamPlayers.map((p) => ({ userId: p.userId, displayName: p.displayName, rsns: p.rsns }))}
-          canEdit={isAdmin && board.status === "live" && board.startsAt <= new Date()}
+          canEdit={
+            (isAdmin || (selectedTeam !== null && selectedTeam.captainUserId === user.id)) &&
+            board.status === "live" &&
+            board.startsAt <= new Date()
+          }
           notStartedYet={board.status === "live" && board.startsAt > new Date()}
           tiles={tiles.map((t) => ({
             id: t.id,

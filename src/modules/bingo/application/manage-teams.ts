@@ -99,3 +99,26 @@ export class GetPlayers {
     return this.players.findByUserIds([...new Set(userIds)]);
   }
 }
+
+/** An admin picks a team's captain (one of its members), or clears it with null. */
+export class SetTeamCaptain {
+  constructor(
+    private readonly boards: BoardRepository,
+    private readonly teams: TeamRepository,
+  ) {}
+
+  async execute(boardId: string, teamId: string, userId: string | null): Promise<Result<null>> {
+    const editable = await editableBoard(this.boards, boardId);
+    if (!editable.ok) return editable;
+    const teams = await this.teams.listForBoard(boardId);
+    if (!teams.some((t) => t.id === teamId)) return fail("That team isn't on this board.");
+    if (userId !== null) {
+      const members = await this.teams.listMembers(boardId);
+      if (!members.some((m) => m.teamId === teamId && m.userId === userId)) {
+        return fail("The captain must be a member of the team.");
+      }
+    }
+    await this.teams.setCaptain(teamId, userId);
+    return ok(null);
+  }
+}

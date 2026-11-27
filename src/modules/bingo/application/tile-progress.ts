@@ -9,6 +9,7 @@ import type {
   TileRepository,
 } from "../domain/repositories";
 import type { CompletionSource } from "../domain/completion";
+import { type Actor, canEditTeamProgress } from "../domain/team";
 import { fail, ok, type Result } from "./board-result";
 
 export interface AddProgressInput {
@@ -21,8 +22,8 @@ export interface AddProgressInput {
   readonly obtainedBy: string;
   readonly obtainedRsn: string | null;
   readonly source: CompletionSource;
-  /** The admin adding it; null for Dink. */
-  readonly addedBy: string | null;
+  /** Who is adding it (an admin or the team's captain); null for Dink, which the system trusts. */
+  readonly actor: Actor | null;
   readonly note: string | null;
 }
 
@@ -58,7 +59,11 @@ export class AddTileProgress {
     ]);
     const tile = tiles.find((t) => t.id === input.tileId);
     if (!tile) return fail("That tile isn't on this board.");
-    if (!teams.some((t) => t.id === input.teamId)) return fail("That team isn't on this board.");
+    const team = teams.find((t) => t.id === input.teamId);
+    if (!team) return fail("That team isn't on this board.");
+    if (input.actor && !canEditTeamProgress(input.actor, team)) {
+      return fail("Only admins and this team's captain can add drops.");
+    }
     if (!members.some((m) => m.teamId === input.teamId && m.userId === input.obtainedBy)) {
       return fail("Pick a member of this team as the one who got the drop.");
     }
@@ -80,7 +85,18 @@ export class AddTileProgress {
 
     const amount = Math.min(input.amount, before.remaining);
     const note = input.note?.trim().slice(0, 300) || null;
-    await this.progress.add({ ...input, amount, note });
+    const addedBy = input.actor?.userId ?? null;
+    await this.progress.add({
+      teamId: input.teamId,
+      tileId: input.tileId,
+      amount,
+      itemId: input.itemId,
+      obtainedBy: input.obtainedBy,
+      obtainedRsn: input.obtainedRsn,
+      source: input.source,
+      addedBy,
+      note,
+    });
 
     const after = tileProgress(tile.quantity, [...entries, { amount }], false);
     if (after.complete) {
@@ -88,7 +104,7 @@ export class AddTileProgress {
         teamId: input.teamId,
         tileId: input.tileId,
         source: input.source,
-        markedBy: input.addedBy,
+        markedBy: addedBy,
         note,
         completedBy: input.obtainedBy,
         completedRsn: input.obtainedRsn,
@@ -103,14 +119,18 @@ export class UndoLastProgress {
   constructor(
     private readonly boards: BoardRepository,
     private readonly tiles: TileRepository,
+    private readonly teams: TeamRepository,
     private readonly progress: ProgressRepository,
     private readonly completions: CompletionRepository,
   ) {}
 
-  async execute(input: { boardId: string; teamId: string; tileId: string }): Promise<Result<null>> {
+  async execute(input: { boardId: string; teamId: string; tileId: string; actor: Actor }): Promise<Result<null>> {
     const board = await this.boards.findById(input.boardId);
     if (!board) return fail("That board doesn't exist.");
     if (board.status !== "live") return fail("Drops can only be changed while the board is live.");
+    const team = (await this.teams.listForBoard(input.boardId)).find((t) => t.id === input.teamId);
+    if (!team) return fail("That team isn't on this board.");
+    if (!canEditTeamProgress(input.actor, team)) return fail("Only admins and this team's captain can undo drops.");
     const tile = (await this.tiles.listForBoard(input.boardId)).find((t) => t.id === input.tileId);
     if (!tile) return fail("That tile isn't on this board.");
 

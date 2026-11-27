@@ -12,6 +12,7 @@ export interface ProgressEntry {
   readonly obtainedByName: string | null;
   readonly obtainedRsn: string | null;
   readonly source: CompletionSource;
+  readonly addedBy: string | null;
   readonly addedByName: string | null;
   readonly note: string | null;
   readonly addedAt: Date;

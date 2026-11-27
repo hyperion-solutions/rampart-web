@@ -32,9 +32,12 @@ export interface TeamRepository {
   rename(teamId: string, name: string, colour: string | null): Promise<Team>;
   remove(teamId: string): Promise<void>;
   listMembers(boardId: string): Promise<TeamMember[]>;
-  /** Adds the user to the team, moving them off any other team on the same board. */
+  /** Adds the user to the team, moving them off any other team on the same board (and its captaincy). */
   addMember(boardId: string, teamId: string, userId: string): Promise<void>;
+  /** Also clears the captain if it was them. */
   removeMember(teamId: string, userId: string): Promise<void>;
+  /** Sets or clears (null) the team's captain. */
+  setCaptain(teamId: string, userId: string | null): Promise<void>;
 }
 
 /** Port: completed tiles. A team completes a tile at most once. */

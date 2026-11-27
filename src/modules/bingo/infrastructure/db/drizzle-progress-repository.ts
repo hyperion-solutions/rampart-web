@@ -37,6 +37,7 @@ export class DrizzleProgressRepository implements ProgressRepository, BingoHisto
       obtainedByName: r.obtainedByName,
       obtainedRsn: e.obtainedRsn,
       source: e.source,
+      addedBy: e.addedBy,
       addedByName: r.addedByName,
       note: e.note,
       addedAt: e.addedAt,

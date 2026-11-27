@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { container } from "@/composition/container";
-import { requireAdmin } from "@/composition/require-admin";
+import { requireMember } from "@/composition/require-admin";
 
 export type DropResult = { readonly ok: true } | { readonly ok: false; readonly error: string };
 
@@ -16,9 +16,9 @@ export interface DropInput {
 
 const isId = (v: unknown): v is string => typeof v === "string" && v.length > 0 && v.length < 64;
 
-/** An admin adds drops to a tile for a team, saying who got them. */
+/** An admin or the team's captain adds drops to a tile, saying who got them. The use case checks who may. */
 export async function addDropAction(boardId: string, teamId: string, tileId: string, drop: DropInput): Promise<DropResult> {
-  const admin = await requireAdmin(`/bingo/${boardId}`);
+  const user = await requireMember(`/bingo/${boardId}`);
   const valid =
     isId(boardId) &&
     isId(teamId) &&
@@ -39,7 +39,7 @@ export async function addDropAction(boardId: string, teamId: string, tileId: str
     obtainedBy: drop.obtainedBy,
     obtainedRsn: drop.obtainedRsn,
     source: "admin",
-    addedBy: admin.id,
+    actor: { userId: user.id, isAdmin: user.isAdmin === true },
     note: drop.note,
   });
   if (!result.ok) return { ok: false, error: result.error };
@@ -49,9 +49,14 @@ export async function addDropAction(boardId: string, teamId: string, tileId: str
 
 /** Removes the newest addition for a team's tile; reopens the tile if needed. */
 export async function undoLastDropAction(boardId: string, teamId: string, tileId: string): Promise<DropResult> {
-  await requireAdmin(`/bingo/${boardId}`);
+  const user = await requireMember(`/bingo/${boardId}`);
   if (!isId(boardId) || !isId(teamId) || !isId(tileId)) return { ok: false, error: "That tile couldn't be read." };
-  const result = await container.bingo.undoLastProgress.execute({ boardId, teamId, tileId });
+  const result = await container.bingo.undoLastProgress.execute({
+    boardId,
+    teamId,
+    tileId,
+    actor: { userId: user.id, isAdmin: user.isAdmin === true },
+  });
   if (!result.ok) return { ok: false, error: result.error };
   revalidatePath(`/bingo/${boardId}`);
   return { ok: true };

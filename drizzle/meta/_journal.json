@@ -50,6 +50,13 @@
       "when": 1795801550566,
       "tag": "0006_line_bonuses",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795806955309,
+      "tag": "0007_team_captains",
+      "breakpoints": true
     }
   ]
 }
