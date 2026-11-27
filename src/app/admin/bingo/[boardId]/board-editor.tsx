@@ -1,0 +1,243 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { ItemIcon, ItemPicker, type PickedItem } from "@/app/_components/item-picker";
+import { clearTileAction, saveTileAction } from "../actions";
+
+export interface EditorTile {
+  readonly row: number;
+  readonly col: number;
+  readonly name: string;
+  readonly points: number;
+  readonly quantity: number;
+  readonly description: string | null;
+  readonly iconItemId: number | null;
+  readonly itemIds: readonly number[];
+}
+
+type ItemsById = Readonly<Record<number, PickedItem>>;
+
+const inputClass =
+  "mt-1 block w-full border-4 border-black bg-obsidian px-3 py-2 font-pixel text-pixel text-limestone outline-none focus:border-rune";
+
+/** The admin's board editor: click a square, then fill it in the panel. */
+export function BoardEditor({
+  boardId,
+  size,
+  tiles,
+  items,
+  readOnly,
+}: {
+  boardId: string;
+  size: number;
+  tiles: readonly EditorTile[];
+  items: ItemsById;
+  readOnly: boolean;
+}) {
+  const [selected, setSelected] = useState<{ row: number; col: number } | null>(null);
+  const byPosition = new Map(tiles.map((t) => [`${t.row}:${t.col}`, t]));
+  const current = selected ? byPosition.get(`${selected.row}:${selected.col}`) : undefined;
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}>
+        {Array.from({ length: size * size }, (_, i) => {
+          const row = Math.floor(i / size);
+          const col = i % size;
+          const tile = byPosition.get(`${row}:${col}`);
+          const icon = tile?.iconItemId != null ? items[tile.iconItemId] : undefined;
+          const isSelected = selected?.row === row && selected.col === col;
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setSelected({ row, col })}
+              aria-label={tile ? `${tile.name}, ${tile.points} points` : `Empty square, row ${row + 1}, column ${col + 1}`}
+              className={`flex aspect-square flex-col items-center justify-center gap-1 p-1 text-center ${
+                tile ? "bg-keep" : "bg-obsidian/60"
+              } shadow-[inset_0_0_0_4px] ${isSelected ? "shadow-brass" : "shadow-mortar hover:shadow-rune"}`}
+            >
+              {tile ? (
+                <>
+                  {icon ? <ItemIcon item={icon} /> : <span className="font-pixel text-pixel-2x text-steel">?</span>}
+                  <span className="line-clamp-2 font-pixel text-pixel leading-tight text-limestone text-shadow-pixel">
+                    {tile.name}
+                  </span>
+                  <span className="font-pixel text-pixel text-gain text-shadow-pixel">
+                    {tile.points} pts{tile.quantity > 1 ? ` · x${tile.quantity}` : ""}
+                  </span>
+                </>
+              ) : (
+                <span className="font-pixel text-pixel-2x text-mortar">+</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="pixel-box h-fit p-5">
+        {selected ? (
+          <TilePanel
+            key={`${selected.row}:${selected.col}`}
+            boardId={boardId}
+            row={selected.row}
+            col={selected.col}
+            tile={current}
+            items={items}
+            readOnly={readOnly}
+            onClose={() => setSelected(null)}
+          />
+        ) : (
+          <p className="text-steel text-shadow-pixel">
+            {readOnly ? "This board is finished, so its squares can't change." : "Click a square to fill it."}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TilePanel({
+  boardId,
+  row,
+  col,
+  tile,
+  items,
+  readOnly,
+  onClose,
+}: {
+  boardId: string;
+  row: number;
+  col: number;
+  tile: EditorTile | undefined;
+  items: ItemsById;
+  readOnly: boolean;
+  onClose: () => void;
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [message, setMessage] = useState<{ tone: "ok" | "warn"; text: string } | null>(null);
+
+  const known = (id: number | null | undefined) => (id != null ? items[id] : undefined);
+  const [picked, setPicked] = useState<PickedItem[]>(
+    () => (tile?.itemIds ?? []).map((id) => known(id)).filter((i): i is PickedItem => i !== undefined),
+  );
+  const firstItemIcon = tile?.itemIds[0];
+  const [icon, setIcon] = useState<PickedItem[]>(() => {
+    const custom = tile?.iconItemId != null && tile.iconItemId !== firstItemIcon ? known(tile.iconItemId) : undefined;
+    return custom ? [custom] : [];
+  });
+  const [name, setName] = useState(tile?.name ?? "");
+  const [points, setPoints] = useState(String(tile?.points ?? 10));
+  const [quantity, setQuantity] = useState(String(tile?.quantity ?? 1));
+  const [description, setDescription] = useState(tile?.description ?? "");
+
+  function onItemsChange(next: PickedItem[]) {
+    if (name.trim().length === 0 && next[0]) setName(next[0].name);
+    setPicked(next);
+  }
+
+  function save() {
+    setMessage(null);
+    startTransition(async () => {
+      const result = await saveTileAction(boardId, {
+        row,
+        col,
+        name,
+        points: Number(points),
+        quantity: Number(quantity),
+        description: description.trim() || null,
+        iconItemId: icon[0]?.id ?? picked[0]?.id ?? null,
+        itemIds: picked.map((i) => i.id),
+      });
+      setMessage(result.ok ? { tone: "ok", text: "Saved." } : { tone: "warn", text: result.error });
+      if (result.ok) router.refresh();
+    });
+  }
+
+  function clear() {
+    setMessage(null);
+    startTransition(async () => {
+      const result = await clearTileAction(boardId, row, col);
+      if (result.ok) {
+        router.refresh();
+        onClose();
+      } else setMessage({ tone: "warn", text: result.error });
+    });
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-pixel text-pixel text-brass text-shadow-pixel">
+          Row {row + 1}, column {col + 1}
+        </h3>
+        <button type="button" onClick={onClose} className="font-pixel text-pixel text-steel hover:text-limestone">
+          Close
+        </button>
+      </div>
+
+      <fieldset disabled={readOnly || pending} className="space-y-4">
+        <div>
+          <p className="font-pixel text-pixel text-limestone text-shadow-pixel">Items (any one completes it)</p>
+          <p className="mb-2 text-steel text-shadow-pixel">Leave empty for a goal like &ldquo;99 Runecraft&rdquo;.</p>
+          <ItemPicker value={picked} onChange={onItemsChange} />
+        </div>
+
+        <label className="block">
+          <span className="font-pixel text-pixel text-limestone text-shadow-pixel">Tile name</span>
+          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} className={inputClass} />
+        </label>
+
+        <div className="grid grid-cols-2 gap-3">
+          <label className="block">
+            <span className="font-pixel text-pixel text-limestone text-shadow-pixel">Points</span>
+            <input type="number" min={0} max={1000} value={points} onChange={(e) => setPoints(e.target.value)} className={inputClass} />
+          </label>
+          <label className="block">
+            <span className="font-pixel text-pixel text-limestone text-shadow-pixel">Quantity</span>
+            <input type="number" min={1} max={1000} value={quantity} onChange={(e) => setQuantity(e.target.value)} className={inputClass} />
+          </label>
+        </div>
+
+        <label className="block">
+          <span className="font-pixel text-pixel text-limestone text-shadow-pixel">Description (optional)</span>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={2}
+            placeholder="e.g. Any piece counts"
+            className={`${inputClass} font-body`}
+          />
+        </label>
+
+        <div>
+          <p className="font-pixel text-pixel text-limestone text-shadow-pixel">Icon (optional)</p>
+          <p className="mb-2 text-steel text-shadow-pixel">Defaults to the first item. Pick one for text-only goals.</p>
+          <ItemPicker value={icon} onChange={setIcon} multiple={false} />
+        </div>
+
+        {message && (
+          <p
+            role="status"
+            className={`px-3 py-2 text-limestone text-shadow-pixel ${message.tone === "ok" ? "bg-gain/15" : "bg-banner/30"}`}
+          >
+            {message.text}
+          </p>
+        )}
+
+        <div className="flex flex-wrap items-center gap-4">
+          <button type="button" onClick={save} className="pixel-btn bg-rune text-white disabled:opacity-60">
+            {pending ? "Saving..." : "Save tile"}
+          </button>
+          {tile && (
+            <button type="button" onClick={clear} className="font-pixel text-pixel text-steel hover:text-banner">
+              Clear square
+            </button>
+          )}
+        </div>
+      </fieldset>
+    </div>
+  );
+}
