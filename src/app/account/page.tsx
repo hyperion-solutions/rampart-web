@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { auth, signOut } from "@/composition/auth";
 import { container } from "@/composition/container";
 import { SectionHeading } from "@/shared/ui/section-heading";
+import { AccountCard } from "./_components/account-card";
 
 export const metadata = { title: "My account | Rampart" };
 
@@ -12,7 +13,7 @@ export default async function AccountPage() {
   if (!session?.user) redirect("/signin?callbackUrl=/account");
 
   const { name, image, rank, rankIconUrl } = session.user;
-  const accounts = session.user.id ? await container.listMyAccounts.execute(session.user.id) : [];
+  const accounts = session.user.id ? await container.getMyAccountsOverview.execute(session.user.id) : [];
 
   async function signOutAction() {
     "use server";
@@ -20,7 +21,7 @@ export default async function AccountPage() {
   }
 
   return (
-    <section className="mx-auto max-w-2xl">
+    <section className="mx-auto max-w-4xl">
       <SectionHeading eyebrow="Signed in with Discord" title="My account" />
       <div className="pixel-box flex flex-wrap items-center gap-5 p-6">
         {image && <Image src={image} alt="" width={64} height={64} className="size-16 border-4 border-black" />}
@@ -41,27 +42,24 @@ export default async function AccountPage() {
         </form>
       </div>
 
-      <div className="pixel-box mt-6 p-6">
-        <h2 className="font-pixel text-pixel text-brass text-shadow-pixel">Linked accounts</h2>
+      <div className="mt-10">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
+          <h2 className="font-quill text-pixel-2x text-lightning text-shadow-pixel">Linked accounts</h2>
+          <Link href="/account/link" className="pixel-btn bg-rune text-white">
+            {accounts.length === 0 ? "Link an account" : "Link another account"}
+          </Link>
+        </div>
         {accounts.length === 0 ? (
-          <p className="mt-2 text-steel text-shadow-pixel">
+          <p className="pixel-box p-6 text-steel text-shadow-pixel">
             No accounts linked yet. Link your clan accounts by logging in with the Dink RuneLite plugin.
           </p>
         ) : (
-          <ul className="mt-3 divide-y-4 divide-obsidian">
-            {accounts.map((a) => (
-              <li key={a.id} className="flex items-center justify-between py-2">
-                <span className="font-pixel text-pixel text-limestone text-shadow-pixel">{a.rsn}</span>
-                <span className="text-steel text-shadow-pixel">
-                  {a.verifiedVia === "dink" ? "Verified with Dink" : "Approved by an admin"}
-                </span>
-              </li>
+          <div className="grid gap-4 md:grid-cols-2">
+            {accounts.map((overview) => (
+              <AccountCard key={overview.account.id} overview={overview} />
             ))}
-          </ul>
+          </div>
         )}
-        <Link href="/account/link" className="pixel-btn mt-4 bg-rune text-white">
-          {accounts.length === 0 ? "Link an account" : "Link another account"}
-        </Link>
       </div>
     </section>
   );

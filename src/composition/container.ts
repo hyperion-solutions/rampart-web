@@ -6,6 +6,7 @@ import { WomClanRepository } from "@/modules/clan/infrastructure/wiseoldman/wom-
 import { WomClient } from "@/modules/clan/infrastructure/wiseoldman/wom-client";
 import { CheckClanMembership } from "@/modules/accounts/application/check-clan-membership";
 import { CreateLinkToken } from "@/modules/accounts/application/create-link-token";
+import { GetMyAccountsOverview } from "@/modules/accounts/application/get-my-accounts-overview";
 import { GetLinkToken } from "@/modules/accounts/application/get-link-token";
 import { LinkAccountFromDink } from "@/modules/accounts/application/link-account-from-dink";
 import { ListMyAccounts } from "@/modules/accounts/application/list-my-accounts";
@@ -29,6 +30,7 @@ export function createContainer() {
   const clanMembership = new DiscordGuildMembership(site.discordGuildId, site.clanRankRoles);
   const linkTokens = new DrizzleLinkTokenRepository(getAccountsDb);
   const linkedAccounts = new DrizzleLinkedAccountRepository(getAccountsDb);
+  const clanRoster = new ClanRosterDirectory(clanRepository);
   return {
     getClanOverview: new GetClanOverview(clanRepository),
     getTopGainers: new GetTopGainers(clanRepository),
@@ -41,10 +43,11 @@ export function createContainer() {
     linkAccountFromDink: new LinkAccountFromDink(
       linkTokens,
       linkedAccounts,
-      new ClanRosterDirectory(clanRepository),
+      clanRoster,
       site.clanName,
     ),
     listMyAccounts: new ListMyAccounts(linkedAccounts),
+    getMyAccountsOverview: new GetMyAccountsOverview(linkedAccounts, clanRoster),
     unlinkAccount: new UnlinkAccount(linkedAccounts),
     /** Turns a Dink HTTP request into a domain notification (adapter). */
     readDinkNotification,
