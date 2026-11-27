@@ -78,6 +78,15 @@ export function UserMenu() {
         >
           My account
         </Link>
+        {session.user.isAdmin && (
+          <Link
+            href="/admin/claims"
+            onClick={() => menu.current?.removeAttribute("open")}
+            className="px-3 py-2 text-brass hover:bg-rune/30 hover:text-limestone"
+          >
+            Link requests
+          </Link>
+        )}
         <button
           type="button"
           onClick={() => signOut({ redirectTo: "/" })}

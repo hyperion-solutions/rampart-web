@@ -12,6 +12,8 @@ declare module "next-auth" {
       rank?: string;
       /** The rank's Discord role icon, when it has one. */
       rankIconUrl?: string;
+      /** Officer and above (site.adminRanks): can review link requests. */
+      isAdmin?: boolean;
     } & DefaultSession["user"];
   }
 }

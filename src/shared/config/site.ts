@@ -28,6 +28,8 @@ export const site = {
     "Co-leader": "1524188588336480387",
     Leader: "1523868355088617654",
   },
+  /** Ranks that can approve or reject manual link requests (/admin/claims). */
+  adminRanks: ["Officer", "Co-leader", "Leader"] as readonly string[],
   /**
    * Rank role icons, copied from the Rampart Discord (64x64 PNGs in public/icons/ranks).
    */

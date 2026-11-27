@@ -65,3 +65,28 @@ export const linkedAccounts = pgTable(
   },
   (t) => [index("linked_accounts_user_id").on(t.userId)],
 );
+
+export const claimStatus = pgEnum("claim_status", ["pending", "approved", "rejected"]);
+
+/** A member's request to link an RSN without Dink; an admin approves or rejects it. */
+export const linkClaims = pgTable(
+  "link_claims",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** As the clan roster shows it when the claim was made. */
+    rsn: text("rsn").notNull(),
+    womPlayerId: integer("wom_player_id").notNull(),
+    accountType: text("account_type").notNull(),
+    status: claimStatus("status").notNull().default("pending"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    decidedBy: uuid("decided_by").references(() => users.id, { onDelete: "set null" }),
+  },
+  (t) => [
+    uniqueIndex("link_claims_one_pending_per_player").on(t.womPlayerId).where(sql`${t.status} = 'pending'`),
+    index("link_claims_user_id").on(t.userId),
+  ],
+);
