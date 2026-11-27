@@ -10,7 +10,7 @@ declare module "next-auth" {
     user: {
       id: string;
       rank?: string;
-      /** 13x13 pixel-art icon for the rank, when one exists. */
+      /** The rank's Discord role icon, when it has one. */
       rankIconUrl?: string;
     } & DefaultSession["user"];
   }
