@@ -3,6 +3,16 @@ export type BoardStatus = "draft" | "live" | "finished";
 export const MIN_BOARD_SIZE = 3;
 export const MAX_BOARD_SIZE = 7;
 
+/** Bonus points per completed line, and for completing every tile. 0 = no bonus. */
+export interface LineBonuses {
+  readonly row: number;
+  readonly column: number;
+  readonly diagonal: number;
+  readonly blackout: number;
+}
+
+export const NO_BONUSES: LineBonuses = { row: 0, column: 0, diagonal: 0, blackout: 0 };
+
 /** A bingo event: a square grid of tiles, played by teams between two dates. */
 export interface Board {
   readonly id: string;
@@ -13,10 +23,11 @@ export interface Board {
   readonly startsAt: Date;
   readonly endsAt: Date;
   readonly status: BoardStatus;
+  readonly bonuses: LineBonuses;
   readonly createdBy: string | null;
 }
 
-export type BoardDetails = Pick<Board, "title" | "rules" | "size" | "startsAt" | "endsAt">;
+export type BoardDetails = Pick<Board, "title" | "rules" | "size" | "startsAt" | "endsAt" | "bonuses">;
 
 /** Returns a problem to show the admin, or null when the details are valid. */
 export function validateBoardDetails(d: BoardDetails): string | null {
@@ -27,6 +38,10 @@ export function validateBoardDetails(d: BoardDetails): string | null {
   }
   if (Number.isNaN(d.startsAt.getTime()) || Number.isNaN(d.endsAt.getTime())) return "Set a start and end date.";
   if (d.endsAt <= d.startsAt) return "The end must be after the start.";
+  const bonusOk = (n: number) => Number.isInteger(n) && n >= 0 && n <= 10_000;
+  if (![d.bonuses.row, d.bonuses.column, d.bonuses.diagonal, d.bonuses.blackout].every(bonusOk)) {
+    return "Bonuses must be whole numbers from 0 to 10,000.";
+  }
   return null;
 }
 

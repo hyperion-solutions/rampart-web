@@ -43,6 +43,13 @@
       "when": 1795797787074,
       "tag": "0005_tile_progress",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795801550566,
+      "tag": "0006_line_bonuses",
+      "breakpoints": true
     }
   ]
 }

@@ -50,8 +50,8 @@ export class GetBoardOverview {
       members,
       completions,
       progress,
-      scores: scoreTeams(teams, tiles, completions),
-      maxPoints: maxPoints(tiles),
+      scores: scoreTeams(board, teams, tiles, completions),
+      maxPoints: maxPoints(board, tiles),
     };
   }
 }

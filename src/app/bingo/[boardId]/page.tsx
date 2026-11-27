@@ -5,10 +5,36 @@ import { container } from "@/composition/container";
 import { requireMember } from "@/composition/require-admin";
 import { formatDateTime } from "@/shared/lib/format";
 import { SectionHeading } from "@/shared/ui/section-heading";
+import type { CompletedLines } from "@/modules/bingo/domain/completion";
 import { tileProgress } from "@/modules/bingo/domain/progress";
 import { BoardView, type ViewTileState } from "./board-view";
 
 export const metadata = { title: "Bingo board | Rampart" };
+
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+/** "2 rows, 1 diagonal, blackout" */
+function describeLines(lines: CompletedLines): string {
+  return [
+    lines.rows.length > 0 && plural(lines.rows.length, "row"),
+    lines.columns.length > 0 && plural(lines.columns.length, "column"),
+    lines.diagonals.length > 0 && plural(lines.diagonals.length, "diagonal"),
+    lines.blackout && "blackout",
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
+/** Squares ("row:col") on any completed line, to outline on the grid. */
+function lineSquares(lines: CompletedLines, size: number): string[] {
+  const range = Array.from({ length: size }, (_, i) => i);
+  return [
+    ...lines.rows.flatMap((r) => range.map((c) => `${r}:${c}`)),
+    ...lines.columns.flatMap((c) => range.map((r) => `${r}:${c}`)),
+    ...(lines.diagonals.includes("main") ? range.map((i) => `${i}:${i}`) : []),
+    ...(lines.diagonals.includes("anti") ? range.map((i) => `${i}:${size - 1 - i}`) : []),
+  ];
+}
 export const dynamic = "force-dynamic";
 
 export default async function BingoBoardPage({
@@ -74,6 +100,20 @@ export default async function BingoBoardPage({
         <p className="text-steel text-shadow-pixel">
           {board.size}×{board.size} · {formatDateTime(board.startsAt)} to {formatDateTime(board.endsAt)}
         </p>
+        {board.bonuses.row + board.bonuses.column + board.bonuses.diagonal + board.bonuses.blackout > 0 && (
+          <p className="mt-2 font-pixel text-pixel text-brass text-shadow-pixel">
+            Bonuses:{" "}
+            {[
+              ["Row", board.bonuses.row],
+              ["Column", board.bonuses.column],
+              ["Diagonal", board.bonuses.diagonal],
+              ["Blackout", board.bonuses.blackout],
+            ]
+              .filter(([, pts]) => Number(pts) > 0)
+              .map(([label, pts]) => `${label} ${pts} pts`)
+              .join(" · ")}
+          </p>
+        )}
         {board.rules && (
           <details className="pixel-box mt-4 p-4">
             <summary className="cursor-pointer font-pixel text-pixel text-brass text-shadow-pixel">Rules</summary>
@@ -100,7 +140,10 @@ export default async function BingoBoardPage({
                     {s.team.name}
                     {s.team.id === myTeamId && <span className="text-brass"> (your team)</span>}
                   </span>
-                  <span className="text-steel">{s.tilesCompleted} tiles</span>
+                  <span className="hidden text-steel sm:inline">
+                    {s.tilesCompleted} tiles
+                    {s.bonusPoints > 0 && ` · ${s.tilePoints} + ${s.bonusPoints} bonus (${describeLines(s.lines)})`}
+                  </span>
                   <span className="w-28 text-right font-pixel text-pixel text-gain text-shadow-pixel">
                     {s.points} / {maxPoints}
                   </span>
@@ -126,6 +169,10 @@ export default async function BingoBoardPage({
           size={board.size}
           team={selectedTeam ? { id: selectedTeam.id, name: selectedTeam.name } : null}
           states={states}
+          lineSquares={lineSquares(
+            scores.find((sc) => sc.team.id === selectedTeam?.id)?.lines ?? { rows: [], columns: [], diagonals: [], blackout: false },
+            board.size,
+          )}
           members={teamPlayers.map((p) => ({ userId: p.userId, displayName: p.displayName, rsns: p.rsns }))}
           canEdit={isAdmin && board.status === "live"}
           tiles={tiles.map((t) => ({

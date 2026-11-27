@@ -15,14 +15,24 @@ const toBoard = (r: BoardRow): Board => ({
   startsAt: r.startsAt,
   endsAt: r.endsAt,
   status: r.status,
+  bonuses: { row: r.bonusRow, column: r.bonusColumn, diagonal: r.bonusDiagonal, blackout: r.bonusBlackout },
   createdBy: r.createdBy,
+});
+
+/** BoardDetails → table columns. */
+const toRow = ({ bonuses, ...details }: BoardDetails) => ({
+  ...details,
+  bonusRow: bonuses.row,
+  bonusColumn: bonuses.column,
+  bonusDiagonal: bonuses.diagonal,
+  bonusBlackout: bonuses.blackout,
 });
 
 export class DrizzleBoardRepository implements BoardRepository {
   constructor(private readonly db: () => BingoDb) {}
 
   async create(details: BoardDetails, createdBy: string): Promise<Board> {
-    const [row] = await this.db().insert(bingoBoards).values({ ...details, createdBy }).returning();
+    const [row] = await this.db().insert(bingoBoards).values({ ...toRow(details), createdBy }).returning();
     if (!row) throw new Error(`Could not create the board "${details.title}"`);
     return toBoard(row);
   }
@@ -41,7 +51,7 @@ export class DrizzleBoardRepository implements BoardRepository {
   }
 
   async updateDetails(id: string, details: BoardDetails): Promise<Board> {
-    const [row] = await this.db().update(bingoBoards).set(details).where(eq(bingoBoards.id, id)).returning();
+    const [row] = await this.db().update(bingoBoards).set(toRow(details)).where(eq(bingoBoards.id, id)).returning();
     if (!row) throw new Error(`Board ${id} no longer exists`);
     return toBoard(row);
   }
