@@ -114,7 +114,9 @@ export function BoardEditor({
       >
         {selected ? (
           <TilePanel
-            key={`${selected.row}:${selected.col}`}
+            // Keyed by the square's saved content too, so the form reloads when the square changes
+            // underneath it (fill at random, clear the board, or another admin's save).
+            key={`${selected.row}:${selected.col}:${current ? JSON.stringify(current) : "empty"}`}
             boardId={boardId}
             row={selected.row}
             col={selected.col}
