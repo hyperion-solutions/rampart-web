@@ -27,6 +27,10 @@ import { getAccountsDb } from "@/modules/accounts/infrastructure/db/client";
 import { DrizzleUserRepository } from "@/modules/accounts/infrastructure/db/drizzle-user-repository";
 import { readDinkNotification } from "@/modules/accounts/infrastructure/dink/read-dink-notification";
 import { DiscordGuildMembership } from "@/modules/accounts/infrastructure/discord/discord-guild-membership";
+import { ImportItemCatalog } from "@/modules/items/application/import-item-catalog";
+import { getItemsDb } from "@/modules/items/infrastructure/db/client";
+import { DrizzleItemCatalogRepository } from "@/modules/items/infrastructure/db/drizzle-item-catalog-repository";
+import { HttpItemSourceReader } from "@/modules/items/infrastructure/sources/http-item-source-reader";
 import { env } from "@/shared/config/env";
 import { site } from "@/shared/config/site";
 
@@ -44,6 +48,10 @@ export function createContainer() {
     getClanOverview: new GetClanOverview(clanRepository),
     getTopGainers: new GetTopGainers(clanRepository),
     getClanRoster: new GetClanRoster(clanRepository),
+    importItemCatalog: new ImportItemCatalog(
+      new HttpItemSourceReader("rampart-web item catalog (OSRS clan website)"),
+      new DrizzleItemCatalogRepository(getItemsDb),
+    ),
     signInWithDiscord: new SignInWithDiscord(clanMembership, users),
     deleteMyAccount: new DeleteMyAccount(users),
     checkClanMembership: new CheckClanMembership(clanMembership),

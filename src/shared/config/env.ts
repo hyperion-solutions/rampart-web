@@ -14,6 +14,8 @@ export const env = {
   get authSecret() { return required("AUTH_SECRET"); },
   get authDiscordId() { return required("AUTH_DISCORD_ID"); },
   get authDiscordSecret() { return required("AUTH_DISCORD_SECRET"); },
+  /** Protects scheduled jobs (Vercel Cron sends it as a Bearer token). */
+  get cronSecret() { return required("CRON_SECRET"); },
   /** Preview deploys only: production auth URL that relays Discord sign-ins back to the preview. */
   authRedirectProxyUrl: process.env.AUTH_REDIRECT_PROXY_URL,
 };
