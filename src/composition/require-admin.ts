@@ -13,3 +13,9 @@ export async function requireAdmin(callbackUrl: string): Promise<Session["user"]
   if (!session.user.isAdmin) notFound();
   return session.user;
 }
+
+/** For admin route handlers (JSON APIs): the admin, or null when not signed in or not an admin. */
+export async function getAdmin(): Promise<Session["user"] | null> {
+  const session = await auth();
+  return session?.user?.id && session.user.isAdmin ? session.user : null;
+}
