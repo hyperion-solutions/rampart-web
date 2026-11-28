@@ -13,6 +13,7 @@ import { SubmitLinkClaim } from "@/modules/accounts/application/submit-link-clai
 import { DrizzleLinkClaimRepository } from "@/modules/accounts/infrastructure/db/drizzle-link-claim-repository";
 import { CheckUserExists } from "@/modules/accounts/application/check-user-exists";
 import { IdentifyDinkAccount } from "@/modules/accounts/application/identify-dink-account";
+import { FindLinkOwner } from "@/modules/accounts/application/find-link-owner";
 import { RecordDinkDrops } from "@/modules/bingo/application/record-dink-drops";
 import { VercelBlobScreenshotStore } from "@/modules/bingo/infrastructure/screenshots/vercel-blob-screenshot-store";
 import { CleanUpScreenshots } from "@/modules/bingo/application/clean-up-screenshots";
@@ -107,6 +108,7 @@ export function createContainer() {
     deleteMyAccount: new DeleteMyAccount(users),
     checkUserExists: new CheckUserExists(users),
     identifyDinkAccount: new IdentifyDinkAccount(linkTokens, linkedAccounts),
+    findLinkOwner: new FindLinkOwner(linkTokens),
     checkClanMembership: new CheckClanMembership(clanMembership),
     createLinkToken: new CreateLinkToken(linkTokens),
     revokeLinkToken: new RevokeLinkToken(linkTokens),
