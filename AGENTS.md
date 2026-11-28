@@ -81,4 +81,4 @@ Significant choices are recorded in `docs/decisions/NNNN-title.md` (context, dec
 - Dink `LOOT` counts toward running boards (see `docs/decisions/0003-dink-bingo-tracking.md`): `/api/dink/[token]` identifies the linked account (`IdentifyDinkAccount`), then `RecordDinkDrops` adds each item through `AddTileProgress` with source `dink`. Keep manual and Dink drops on that one path.
 
 ## Out of scope for now
-Automated tests, Discord bot integration, our own RuneLite plugin (revisit in v0.3, #32).
+Automated tests, our own RuneLite plugin. A Discord bot is proposed for v0.6 (`docs/decisions/0004-discord-bot.md`); build it only through that milestone.
