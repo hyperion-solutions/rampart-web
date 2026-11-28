@@ -15,9 +15,10 @@ export default async function LinkAccountPage() {
   const userId = session?.user?.id;
   if (!userId) redirect("/signin?callbackUrl=/account/link");
 
-  const [token, claims] = await Promise.all([
+  const [token, claims, accounts] = await Promise.all([
     container.getLinkToken.execute(userId),
     container.listMyClaims.execute(userId),
+    container.listMyAccounts.execute(userId),
   ]);
   const attempt = token?.lastAttempt
     ? { rsn: token.lastAttempt.rsn, outcome: token.lastAttempt.outcome, at: token.lastAttempt.at.toISOString() }
@@ -49,7 +50,12 @@ export default async function LinkAccountPage() {
     <section className="mx-auto max-w-3xl space-y-6">
       <SectionHeading eyebrow="My account" title="Link your account" />
 
-      <LinkWizard hasLink={token !== null} attempt={attempt} claims={claimList} />
+      <LinkWizard
+        hasLink={token !== null}
+        attempt={attempt}
+        linkedRsns={accounts.map((a) => a.rsn)}
+        claims={claimList}
+      />
 
       <div className="pixel-box space-y-3 p-6">
         <h2 className="font-pixel text-pixel text-brass text-shadow-pixel">Count your bingo drops automatically</h2>
