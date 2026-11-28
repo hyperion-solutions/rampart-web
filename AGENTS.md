@@ -78,7 +78,7 @@ Significant choices are recorded in `docs/decisions/NNNN-title.md` (context, dec
 - See `docs/decisions/0002-bingo.md`. The `items` module owns the OSRS item catalog (imported from RuneLite and the OSRS Wiki, keyed by item id, one canonical id per name); the `bingo` module owns boards, tiles, teams and completions.
 - Store item ids on tiles, never names or image URLs. Item icons come from `static.runelite.net/cache/item/icon/<id>.png` through the image service.
 - Admin-only pages and actions use `requireAdmin()` (Officer and above).
-- Dink `LOOT` counts toward running boards (see `docs/decisions/0003-dink-bingo-tracking.md`): `/api/dink/[token]` identifies the linked account (`IdentifyDinkAccount`), then `RecordDinkDrops` adds each item through `AddTileProgress` with source `dink`. Keep manual and Dink drops on that one path.
+- Dink `LOOT` counts toward running boards (see `docs/decisions/0003-dink-bingo-tracking.md`): `/api/dink/[token]` identifies the linked account (`IdentifyDinkAccount`), then `RecordDinkDrops` adds each item through `AddTileProgress` with source `dink`. Keep manual and Dink drops on that one path. `<Dink link>/config` is Dink's Dynamic Config URL (0006): it serves only `lootItemAllowlist`; never add other Dink settings to it.
 
 ## Out of scope for now
 Automated tests, our own RuneLite plugin. A Discord bot is proposed for v0.6 (`docs/decisions/0004-discord-bot.md`); build it only through that milestone.

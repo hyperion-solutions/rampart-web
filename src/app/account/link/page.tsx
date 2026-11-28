@@ -60,7 +60,7 @@ export default async function LinkAccountPage() {
         <ol className="list-inside list-decimal space-y-1 text-limestone text-shadow-pixel">
           <li>In Dink&apos;s settings, paste your link into Primary Webhook URLs, on its own line. Keep any Discord webhooks already there.</li>
           <li>If the Loot section has its own address under Webhook Overrides, add your link there too: Dink then skips the primary list for loot.</li>
-          <li>Turn on Loot, and set Min Loot Value low enough for the bingo items (0 counts everything).</li>
+          <li>Turn on Loot.</li>
           <li>
             For a picture with each drop, keep Send Image on. Under Advanced, set Screenshot Scale to 50–75% (very large
             screenshots are rejected, and the drop with them) and turn on Hide Chat in Images.
@@ -70,6 +70,22 @@ export default async function LinkAccountPage() {
           Only drops between a board&apos;s start and end count, and we keep the picture only for drops that count. Admins
           and your captain can still add or undo drops by hand.
         </p>
+        <details className="text-steel text-shadow-pixel">
+          <summary className="cursor-pointer font-pixel text-pixel text-limestone">
+            Optional: is your Min Loot Value above 0?
+          </summary>
+          <div className="mt-2 space-y-2">
+            <p>
+              Then Dink skips drops worth less than it, and cheap bingo items would be missed. To have them sent anyway, paste
+              your link with <code className="font-body">/config</code> added at the end into Advanced, Dynamic Config URL. Dink
+              then adds the items on current bingo boards to your Item Allowlist, and updates it each time it starts.
+            </p>
+            <p>
+              To let finished boards&apos; items drop off, also tick Import Policy: Overwrite Item Lists. Skip that if you keep
+              your own Item Allowlist, since it would be replaced.
+            </p>
+          </div>
+        </details>
       </div>
 
       {token && (

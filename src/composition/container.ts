@@ -14,6 +14,9 @@ import { DrizzleLinkClaimRepository } from "@/modules/accounts/infrastructure/db
 import { CheckUserExists } from "@/modules/accounts/application/check-user-exists";
 import { IdentifyDinkAccount } from "@/modules/accounts/application/identify-dink-account";
 import { FindLinkOwner } from "@/modules/accounts/application/find-link-owner";
+import { ListItemNames } from "@/modules/items/application/list-item-names";
+import { DrizzleItemNameLookup } from "@/modules/items/infrastructure/db/drizzle-item-name-lookup";
+import { ListTrackedItemIds } from "@/modules/bingo/application/list-tracked-item-ids";
 import { RecordDinkDrops } from "@/modules/bingo/application/record-dink-drops";
 import { VercelBlobScreenshotStore } from "@/modules/bingo/infrastructure/screenshots/vercel-blob-screenshot-store";
 import { CleanUpScreenshots } from "@/modules/bingo/application/clean-up-screenshots";
@@ -104,6 +107,7 @@ export function createContainer() {
     ),
     searchItems: new SearchItems(itemSearch),
     getItems: new GetItems(itemSearch),
+    listItemNames: new ListItemNames(new DrizzleItemNameLookup(getItemsDb)),
     signInWithDiscord: new SignInWithDiscord(clanMembership, users),
     deleteMyAccount: new DeleteMyAccount(users),
     checkUserExists: new CheckUserExists(users),
@@ -131,6 +135,7 @@ export function createContainer() {
       updateBoard: new UpdateBoard(bingoBoards, bingoTiles),
       changeBoardStatus: new ChangeBoardStatus(bingoBoards),
       listBoards: new ListBoards(bingoBoards),
+      listTrackedItemIds: new ListTrackedItemIds(bingoBoards, bingoTiles),
       getBoardVersion: new GetBoardVersion(bingoBoards, new DrizzleBoardActivity(getBingoDb)),
       getBoardOverview: new GetBoardOverview(bingoBoards, bingoTiles, bingoTeams, bingoCompletions, bingoProgress),
       saveTile: new SaveTile(bingoBoards, bingoTiles),
