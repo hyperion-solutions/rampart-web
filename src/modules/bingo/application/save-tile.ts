@@ -1,3 +1,4 @@
+import { isLocked, lockedReason } from "../domain/board";
 import type { BoardRepository, TileRepository } from "../domain/repositories";
 import { type Tile, type TileInput, validateTile } from "../domain/tile";
 import { fail, ok, type Result } from "./board-result";
@@ -9,10 +10,10 @@ export class SaveTile {
     private readonly tiles: TileRepository,
   ) {}
 
-  async execute(boardId: string, input: TileInput): Promise<Result<Tile>> {
+  async execute(boardId: string, input: TileInput, now: Date = new Date()): Promise<Result<Tile>> {
     const board = await this.boards.findById(boardId);
     if (!board) return fail("That board doesn't exist.");
-    if (board.status === "finished") return fail("Finished boards can't be changed.");
+    if (isLocked(board, now)) return fail(lockedReason(board));
     const problem = validateTile(input, board.size);
     if (problem) return fail(problem);
     return ok(

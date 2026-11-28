@@ -45,6 +45,20 @@ export function validateBoardDetails(d: BoardDetails): string | null {
   return null;
 }
 
+/**
+ * A board's squares and scoring are fixed once it's live and its start time has passed (and when
+ * finished): changing a square mid-event would keep its completions on a different item, and
+ * would change the rules teams are playing to. Drafts stay editable; so do live boards before the start.
+ */
+export const isLocked = (board: Pick<Board, "status" | "startsAt">, now: Date = new Date()) =>
+  board.status === "finished" || (board.status === "live" && board.startsAt <= now);
+
+/** Why a board's squares can't change, for admins. */
+export const lockedReason = (board: Pick<Board, "status">) =>
+  board.status === "finished"
+    ? "This board is finished, so its squares can't change."
+    : "This board has started, so its squares and scoring can't change. Teams can still be edited.";
+
 /** Which status changes are allowed: draft → live → finished, and back from live to draft. */
 export const canChangeStatus = (from: BoardStatus, to: BoardStatus) =>
   (from === "draft" && to === "live") || (from === "live" && (to === "finished" || to === "draft"));
