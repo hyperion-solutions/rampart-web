@@ -9,6 +9,8 @@ import type {
   TileRepository,
 } from "../domain/repositories";
 import type { CompletionSource } from "../domain/completion";
+import type { ScreenshotIndex } from "../domain/screenshot-index";
+import type { ScreenshotStore } from "../domain/screenshot-store";
 import { type Actor, canEditTeamProgress } from "../domain/team";
 import { fail, ok, type Result } from "./board-result";
 
@@ -150,11 +152,25 @@ export class UndoLastProgress {
   }
 }
 
-/** Called when a member deletes their data: their name and RSNs leave bingo history; team points stay. */
+/**
+ * Called when a member deletes their data: their name and RSNs leave bingo history, and the
+ * screenshots of their drops are deleted straight away. Team points stay.
+ */
 export class ForgetBingoPlayer {
-  constructor(private readonly eraser: BingoHistoryEraser) {}
+  constructor(
+    private readonly eraser: BingoHistoryEraser,
+    private readonly screenshots: ScreenshotIndex,
+    /** Null when no store is configured. */
+    private readonly store: ScreenshotStore | null,
+  ) {}
 
-  execute(userId: string): Promise<void> {
-    return this.eraser.forget(userId);
+  async execute(userId: string): Promise<void> {
+    const shots = await this.screenshots.obtainedBy(userId);
+    if (shots.length > 0) {
+      await this.screenshots.forget(shots.map((s) => s.url));
+      // If this fails, the files are no longer linked, so the daily clean-up deletes them.
+      await this.store?.delete(shots.flatMap((s) => [s.url, s.thumbnailUrl])).catch(() => undefined);
+    }
+    await this.eraser.forget(userId);
   }
 }

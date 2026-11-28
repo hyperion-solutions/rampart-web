@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/import-items",
       "schedule": "0 6 * * 4"
+    },
+    {
+      "path": "/api/cron/clean-screenshots",
+      "schedule": "0 7 * * *"
     }
   ]
 }
