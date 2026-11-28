@@ -17,6 +17,8 @@ export interface DinkDropsInput {
 export interface RecordedDrop {
   readonly boardId: string;
   readonly tileId: string;
+  /** The (canonical) item that counted. */
+  readonly itemId: number;
   readonly complete: boolean;
 }
 
@@ -95,7 +97,7 @@ export class RecordDinkDrops {
           );
           // Already complete, or an item an "all" tile already has: nothing to add.
           if (result.ok) {
-            recorded.push({ boardId: board.id, tileId: tile.id, complete: result.value.complete });
+            recorded.push({ boardId: board.id, tileId: tile.id, itemId: drop.itemId, complete: result.value.complete });
             entryIds.push(result.value.entryId);
           }
         }

@@ -46,10 +46,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
       source: loot.source,
       screenshot: loot.screenshot,
     });
+    // "counted" lists only the items that counted; "sent" is everything Dink reported.
+    const counted = [...new Set(recorded.map((r) => r.itemId))].join(",");
     console.info(
       outcome === "counted"
-        ? `[dink] LOOT counted on ${recorded.length} tile(s) (items ${items}; screenshot ${screenshot})`
-        : `[dink] LOOT not counted: ${outcome} (items ${items})`,
+        ? `[dink] LOOT counted ${counted} on ${recorded.length} tile(s); screenshot ${screenshot} (sent ${items})`
+        : `[dink] LOOT not counted: ${outcome} (sent ${items})`,
     );
     return NextResponse.json({ counted: recorded.length, outcome });
   }
