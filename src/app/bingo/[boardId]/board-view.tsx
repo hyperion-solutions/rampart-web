@@ -178,8 +178,8 @@ export function BoardView({
             {/* Someone throwing darts while nothing is picked. OSRS Wiki animation (Dart_animation.gif),
                 game art © Jagex; resized to WebP, still frame for reduced motion. */}
             <picture>
-              <source media="(prefers-reduced-motion: reduce)" srcSet="/bingo/dart-still.png" />
-              <img src="/bingo/dart.webp" alt="" width={80} height={150} className="block" />
+              <source media="(prefers-reduced-motion: reduce)" srcSet="/sprites/dart-still.png" />
+              <img src="/sprites/dart.webp" alt="" width={80} height={150} className="block" />
             </picture>
             <p className="text-steel text-shadow-pixel">Click a tile to see what it needs.</p>
           </div>
