@@ -5,7 +5,6 @@ import { container } from "@/composition/container";
 import { SectionHeading } from "@/shared/ui/section-heading";
 import { AccountCard } from "./_components/account-card";
 import { CharacterPanel, type DinkStatus } from "./_components/character-panel";
-import { YourBingo } from "./_components/your-bingo";
 import { DeleteAccountButton } from "./_components/delete-account-button";
 
 export const metadata = { title: "My account | Rampart" };
@@ -16,13 +15,9 @@ export default async function AccountPage() {
 
   const { name, image, rank, rankIconUrl } = session.user;
   const userId = session.user.id;
-  const [accounts, token, bingo] = userId
-    ? await Promise.all([
-        container.getMyAccountsOverview.execute(userId),
-        container.getLinkToken.execute(userId),
-        container.bingo.getMyBingo.execute(userId),
-      ])
-    : [[], null, null];
+  const [accounts, token] = userId
+    ? await Promise.all([container.getMyAccountsOverview.execute(userId), container.getLinkToken.execute(userId)])
+    : [[], null];
   const dink: DinkStatus = !token
     ? { kind: "none" }
     : token.lastUsedAt
@@ -52,10 +47,6 @@ export default async function AccountPage() {
           </form>
         }
       />
-
-      <div className="mt-10">
-        <YourBingo bingo={bingo} />
-      </div>
 
       <div className="mt-10">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
