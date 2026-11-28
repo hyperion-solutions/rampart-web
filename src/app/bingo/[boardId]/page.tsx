@@ -7,6 +7,7 @@ import { requireMember } from "@/composition/require-admin";
 import { formatDateTime } from "@/shared/lib/format";
 import { SectionHeading } from "@/shared/ui/section-heading";
 import type { CompletedLines } from "@/modules/bingo/domain/completion";
+import { LiveRefresh } from "./live-refresh";
 import { tileProgress } from "@/modules/bingo/domain/progress";
 import { BoardView, type ViewTileState } from "./board-view";
 
@@ -96,8 +97,12 @@ export default async function BingoBoardPage({
     : [];
 
 
+  // Live boards update themselves as drops come in (from Dink or added by hand).
+  const version = board.status === "live" ? await container.bingo.getBoardVersion.execute(board.id, { includeDrafts: isAdmin }) : null;
+
   return (
     <section className="mx-auto max-w-6xl space-y-8">
+      {version && <LiveRefresh boardId={board.id} version={version} />}
       <div>
         <SectionHeading eyebrow={`Bingo · ${board.status === "live" ? "Live" : board.status === "finished" ? "Finished" : "Draft (admins only)"}`} title={board.title} />
         <p className="text-steel text-shadow-pixel">

@@ -14,6 +14,8 @@ import { DrizzleLinkClaimRepository } from "@/modules/accounts/infrastructure/db
 import { CheckUserExists } from "@/modules/accounts/application/check-user-exists";
 import { IdentifyDinkAccount } from "@/modules/accounts/application/identify-dink-account";
 import { RecordDinkDrops } from "@/modules/bingo/application/record-dink-drops";
+import { GetBoardVersion } from "@/modules/bingo/application/get-board-version";
+import { DrizzleBoardActivity } from "@/modules/bingo/infrastructure/db/drizzle-board-activity";
 import { DrizzleCanonicalItemLookup } from "@/modules/items/infrastructure/db/drizzle-canonical-item-lookup";
 import { DeleteMyAccount } from "@/modules/accounts/application/delete-my-account";
 import { GetMyAccountsOverview } from "@/modules/accounts/application/get-my-accounts-overview";
@@ -122,6 +124,7 @@ export function createContainer() {
       updateBoard: new UpdateBoard(bingoBoards, bingoTiles),
       changeBoardStatus: new ChangeBoardStatus(bingoBoards),
       listBoards: new ListBoards(bingoBoards),
+      getBoardVersion: new GetBoardVersion(bingoBoards, new DrizzleBoardActivity(getBingoDb)),
       getBoardOverview: new GetBoardOverview(bingoBoards, bingoTiles, bingoTeams, bingoCompletions, bingoProgress),
       saveTile: new SaveTile(bingoBoards, bingoTiles),
       clearTile: new ClearTile(bingoBoards, bingoTiles),
