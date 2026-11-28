@@ -57,6 +57,7 @@ Fonts are the OSRS bitmap fonts in `src/shared/fonts/` (loaded once via `next/fo
 - `font-quill` RuneScape Quill 8: headings and the wordmark.
 Only use `text-pixel` (16px), `text-pixel-2x` (32px) and `text-pixel-3x` (48px); other sizes blur bitmap fonts.
 Utilities: `.pixel-box` (notched, bevelled panel), `.pixel-btn` (button that presses in), `.text-shadow-pixel`, `.storm` (glow behind the crest), `.line-glow` (completed bingo line), `.blink` (urgent countdown), `StormBackdrop` (landing hero: pixel storm and castle, SVG only; lightning flashes are stepped, not faded), `.crest` (blends the crest's black background into the page). Use the full-quality crest `public/brand/rampart-crest.webp`; don't pixelate it.
+Loading: pages that load data on the server get a `loading.tsx` with `LoadingStopwatch` (the OSRS giant stopwatch, `public/loading/`) and a short label such as "Loading boards...". Static pages and plain forms don't need one.
 
 ## Decisions
 Significant choices are recorded in `docs/decisions/NNNN-title.md` (context, decision, consequences). Read them before changing related code, and add one when making a new significant choice.

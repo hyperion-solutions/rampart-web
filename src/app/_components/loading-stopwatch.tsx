@@ -1,6 +1,7 @@
 /**
- * Shown while a page loads (Next.js `loading.tsx`): the OSRS giant stopwatch running, with a
- * short line of text. A still frame for reduced motion.
+ * The site's standard loading screen, for pages that load data on the server (Next.js
+ * `loading.tsx`): the OSRS giant stopwatch running, with a short line of text. A still frame for
+ * reduced motion. Static pages and plain forms don't need one.
  * Animation: OSRS Wiki (Giant_stopwatch_-_run_animation.gif), game art © Jagex; resized to WebP.
  */
 export function LoadingStopwatch({ label }: { label: string }) {
