@@ -183,7 +183,10 @@ function TilePanel({
   const [description, setDescription] = useState(tile?.description ?? "");
 
   function onItemsChange(next: PickedItem[]) {
-    if (name.trim().length === 0 && next[0]) setName(next[0].name);
+    // The name follows the first item while it's the item's own name (or empty), like the icon does.
+    // A name the admin typed ("Any Zulrah unique") is kept.
+    const automatic = name.trim().length === 0 || name.trim() === picked[0]?.name;
+    if (automatic) setName(next[0]?.name ?? "");
     setPicked(next);
   }
 
