@@ -175,11 +175,11 @@ export function BoardView({
           />
         ) : (
           <div className="flex flex-col items-center gap-3 py-2 text-center">
-            {/* A goblin idling while nothing is picked. OSRS Wiki animation (Goblin, Battle of
-                Atarisundri), game art © Jagex; resized to WebP, still frame for reduced motion. */}
+            {/* Someone throwing darts while nothing is picked. OSRS Wiki animation (Dart_animation.gif),
+                game art © Jagex; resized to WebP, still frame for reduced motion. */}
             <picture>
-              <source media="(prefers-reduced-motion: reduce)" srcSet="/bingo/goblin-idle-still.png" />
-              <img src="/bingo/goblin-idle.webp" alt="" width={121} height={120} className="block" />
+              <source media="(prefers-reduced-motion: reduce)" srcSet="/bingo/dart-still.png" />
+              <img src="/bingo/dart.webp" alt="" width={80} height={150} className="block" />
             </picture>
             <p className="text-steel text-shadow-pixel">Click a tile to see what it needs.</p>
           </div>
