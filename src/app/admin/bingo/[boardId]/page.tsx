@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { container } from "@/composition/container";
 import { requireAdmin } from "@/composition/require-admin";
-import { isLocked, lockedReason } from "@/modules/bingo/domain/board";
+import { BACK_TO_DRAFT_BLOCKED, canGoBackToDraft, isLocked, lockedReason } from "@/modules/bingo/domain/board";
 import { formatDateTime } from "@/shared/lib/format";
 import { SectionHeading } from "@/shared/ui/section-heading";
 import { changeBoardStatusAction, updateBoardAction } from "../actions";
@@ -29,9 +29,11 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
   await requireAdmin(`/admin/bingo/${boardId}`);
   const overview = await container.bingo.getBoardOverview.execute(boardId, { includeDrafts: true }).catch(() => null);
   if (!overview) notFound();
-  const { board, tiles, maxPoints, teams, members } = overview;
+  const { board, tiles, maxPoints, teams, members, progress, completions } = overview;
   // Squares and scoring are fixed once the board is live and has started (or finished).
   const locked = isLocked(board);
+  const draftAllowed = canGoBackToDraft(board, progress.length > 0 || completions.length > 0);
+  const statusActions = STATUS_ACTIONS[board.status].filter((a) => a.to !== "draft" || draftAllowed);
   const players = new Map(
     (await container.bingo.getPlayers.execute(members.map((m) => m.userId))).map((p) => [p.userId, p]),
   );
@@ -58,7 +60,7 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
             ` · bonuses: row ${board.bonuses.row}, column ${board.bonuses.column}, diagonal ${board.bonuses.diagonal}, blackout ${board.bonuses.blackout}`}
         </p>
         <div className="flex flex-wrap gap-3">
-          {STATUS_ACTIONS[board.status].map((a) => (
+          {statusActions.map((a) => (
             <form key={a.to} action={changeBoardStatusAction} title={a.hint}>
               <input type="hidden" name="boardId" value={board.id} />
               <input type="hidden" name="to" value={a.to} />
@@ -71,6 +73,9 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
             </form>
           ))}
         </div>
+        {board.status === "live" && !draftAllowed && (
+          <p className="w-full text-steel text-shadow-pixel">{BACK_TO_DRAFT_BLOCKED}</p>
+        )}
       </div>
 
       {!locked && tiles.length < board.size * board.size && (

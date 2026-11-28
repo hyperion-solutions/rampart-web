@@ -59,6 +59,17 @@ export const lockedReason = (board: Pick<Board, "status">) =>
     ? "This board is finished, so its squares can't change."
     : "This board has started, so its squares and scoring can't change. Teams can still be edited.";
 
+/**
+ * A live board can go back to draft (hidden, editable, nothing counts) until it has started and a
+ * team has drops: after that it would hide progress, ignore drops while hidden and unlock squares
+ * that already have completions. Mistakes mid-event are fixed with Undo, or by finishing the board.
+ */
+export const canGoBackToDraft = (board: Pick<Board, "startsAt">, hasDrops: boolean, now: Date = new Date()) =>
+  !(board.startsAt <= now && hasDrops);
+
+export const BACK_TO_DRAFT_BLOCKED =
+  "Teams already have drops on this board, so it can't go back to draft. Undo a wrong drop on the board, or finish it.";
+
 /** Which status changes are allowed: draft → live → finished, and back from live to draft. */
 export const canChangeStatus = (from: BoardStatus, to: BoardStatus) =>
   (from === "draft" && to === "live") || (from === "live" && (to === "finished" || to === "draft"));
