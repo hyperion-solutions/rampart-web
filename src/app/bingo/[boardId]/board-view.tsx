@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { ItemIcon, type PickedItem } from "@/app/_components/item-picker";
 import { addDropAction, undoLastDropAction } from "../actions";
-import { DropScreenshot } from "./drop-screenshot";
+import { DropScreenshot } from "@/app/_components/drop-screenshot";
 
 export interface ViewTile {
   readonly id: string;
