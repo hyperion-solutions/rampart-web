@@ -6,7 +6,8 @@ import { container } from "@/composition/container";
 import { requireMember } from "@/composition/require-admin";
 import { formatDateTime } from "@/shared/lib/format";
 import { SectionHeading } from "@/shared/ui/section-heading";
-import type { CompletedLines } from "@/modules/bingo/domain/completion";
+import { AUTO_FINISH_AFTER_HOURS, hasEnded } from "@/modules/bingo/domain/board";
+import type { CompletedLines, TeamScore } from "@/modules/bingo/domain/completion";
 import { LiveRefresh } from "./live-refresh";
 import { tileProgress } from "@/modules/bingo/domain/progress";
 import { BoardView, type ViewTileState } from "./board-view";
@@ -99,6 +100,12 @@ export default async function BingoBoardPage({
     : [];
 
 
+  const now = new Date();
+  const ended = board.status === "live" && hasEnded(board, now);
+  const isCaptain = selectedTeam !== null && selectedTeam.captainUserId === user.id;
+  // Captains add drops while the board runs; after the end only admins catch up on late screenshots.
+  const canEdit = board.status === "live" && board.startsAt <= now && (isAdmin || (isCaptain && !ended));
+
   // Live boards update themselves as drops come in (from Dink or added by hand).
   const version = board.status === "live" ? await container.bingo.getBoardVersion.execute(board.id, { includeDrafts: isAdmin }) : null;
 
@@ -132,6 +139,13 @@ export default async function BingoBoardPage({
               .join(" · ")}
           </p>
         )}
+        {ended && (
+          <p role="status" className="mt-4 bg-brass/15 px-4 py-3 text-limestone text-shadow-pixel">
+            This board has ended. Admins are adding the last screenshots; results are final once it&apos;s finished
+            (automatically {AUTO_FINISH_AFTER_HOURS} hours after the end).
+          </p>
+        )}
+        {board.status === "finished" && <Results scores={scores} />}
         {board.rules && (
           <details className="pixel-box mt-4 p-4">
             <summary className="cursor-pointer font-pixel text-pixel text-brass text-shadow-pixel">Rules</summary>
@@ -186,7 +200,7 @@ export default async function BingoBoardPage({
               <span className="text-limestone">
                 {" "}
                 · Captain ★ {members.find((m) => m.userId === selectedTeam.captainUserId)?.displayName}
-                {selectedTeam.captainUserId === user.id && " (you can add drops for your team)"}
+                {isCaptain && canEdit && " (you can add drops for your team)"}
               </span>
             )}
             <span className="text-steel">
@@ -205,12 +219,8 @@ export default async function BingoBoardPage({
             board.size,
           )}
           members={teamPlayers.map((p) => ({ userId: p.userId, displayName: p.displayName, rsns: p.rsns }))}
-          canEdit={
-            (isAdmin || (selectedTeam !== null && selectedTeam.captainUserId === user.id)) &&
-            board.status === "live" &&
-            board.startsAt <= new Date()
-          }
-          notStartedYet={board.status === "live" && board.startsAt > new Date()}
+          canEdit={canEdit}
+          notStartedYet={board.status === "live" && board.startsAt > now}
           tiles={tiles.map((t) => ({
             id: t.id,
             row: t.row,
@@ -243,5 +253,25 @@ export default async function BingoBoardPage({
         </p>
       )}
     </section>
+  );
+}
+
+/** The final result of a finished board: the winner, or the teams tied for first. */
+function Results({ scores }: { scores: readonly TeamScore[] }) {
+  const top = scores[0]?.points ?? 0;
+  const winners = scores.filter((s) => s.points === top);
+  const text =
+    scores.length === 0
+      ? "Finished. No teams played this board."
+      : top === 0
+        ? "Finished. No team completed a tile."
+        : winners.length === 1
+          ? `${winners[0]?.team.name} won with ${top} points!`
+          : `${winners.map((w) => w.team.name).join(" and ")} tied for first with ${top} points!`;
+  return (
+    <div className="pixel-box mt-4 p-5 text-center [--edge:var(--color-brass)]">
+      <p className="font-pixel text-pixel text-brass text-shadow-pixel">Final result</p>
+      <p className="mt-1 font-quill text-pixel-2x text-limestone text-shadow-pixel">{text}</p>
+    </div>
   );
 }
