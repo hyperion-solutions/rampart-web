@@ -21,11 +21,13 @@ Findings from Dink's source (`SettingsManager.java`) and a live test (#108):
 - `GET <Dink link>/config` serves `{"lootItemAllowlist": "<names>"}` for an active link: the names of every item on tiles of boards that are **published and not over** (including boards that haven't started, so members have them before the start). Names include each item's in-game variants (Wiki and RuneLite names), since Dink matches by name.
 - We send **only** that key. Never webhooks, Min Loot Value or anything else.
 - An empty list is sent when no board is running, so, with Overwrite Item Lists, items from finished boards drop off.
-- Members set it up once (link page): Dynamic Config URL, **Overwrite Item Lists** unless they keep their own allowlist, and their usual Min Loot Value instead of 0.
+- It's **optional** (link page, under "Is your Min Loot Value above 0?"). The main setup stays one link in Primary Webhook URLs with Loot on: we don't ask members to change Min Loot Value, since most will leave it at 0 and the same value controls their Discord loot posts. `/config` matters only to members who already use a higher Min Loot Value, so cheap bingo items still reach us.
+- Request volume is handled separately, by a filter in front of the site (0007), not by asking members to change settings.
 
 ## Consequences
 
-- One-time setup; no per-board steps. Traffic drops to bingo items plus whatever members already send.
+- Members with a higher Min Loot Value don't miss cheap bingo items, with no per-board steps. Members at 0 don't need it.
+- It does **not** reduce traffic for members at Min Loot Value 0; see 0007.
 - New board items reach members at their next RuneLite start or within 3 hours of logging in; publish boards before they start.
 - Members who don't tick Overwrite Item Lists keep old boards' items in their allowlist (harmless, but they keep reporting those drops). They can clear them by hand.
 - The board's item names are visible to anyone with a member's link, which is no more than members see on the board.

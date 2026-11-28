@@ -62,18 +62,6 @@ export default async function LinkAccountPage() {
           <li>If the Loot section has its own address under Webhook Overrides, add your link there too: Dink then skips the primary list for loot.</li>
           <li>Turn on Loot.</li>
           <li>
-            Under Advanced, paste your link with <code className="font-body">/config</code> added at the end into Dynamic Config
-            URL. Dink then always reports the items on current bingo boards, and keeps that list up to date by itself.
-          </li>
-          <li>
-            Also under Advanced, tick Import Policy: Overwrite Item Lists, so items from finished boards drop off. Skip this if
-            you keep your own Item Allowlist: it would be replaced.
-          </li>
-          <li>
-            Set Min Loot Value to your usual amount, not 0: bingo items are sent whatever their value, and 0 sends every
-            single kill.
-          </li>
-          <li>
             For a picture with each drop, keep Send Image on. Under Advanced, set Screenshot Scale to 50–75% (very large
             screenshots are rejected, and the drop with them) and turn on Hide Chat in Images.
           </li>
@@ -82,6 +70,22 @@ export default async function LinkAccountPage() {
           Only drops between a board&apos;s start and end count, and we keep the picture only for drops that count. Admins
           and your captain can still add or undo drops by hand.
         </p>
+        <details className="text-steel text-shadow-pixel">
+          <summary className="cursor-pointer font-pixel text-pixel text-limestone">
+            Optional: is your Min Loot Value above 0?
+          </summary>
+          <div className="mt-2 space-y-2">
+            <p>
+              Then Dink skips drops worth less than it, and cheap bingo items would be missed. To have them sent anyway, paste
+              your link with <code className="font-body">/config</code> added at the end into Advanced, Dynamic Config URL. Dink
+              then adds the items on current bingo boards to your Item Allowlist, and updates it each time it starts.
+            </p>
+            <p>
+              To let finished boards&apos; items drop off, also tick Import Policy: Overwrite Item Lists. Skip that if you keep
+              your own Item Allowlist, since it would be replaced.
+            </p>
+          </div>
+        </details>
       </div>
 
       {token && (
