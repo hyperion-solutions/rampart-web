@@ -60,7 +60,19 @@ export default async function LinkAccountPage() {
         <ol className="list-inside list-decimal space-y-1 text-limestone text-shadow-pixel">
           <li>In Dink&apos;s settings, paste your link into Primary Webhook URLs, on its own line. Keep any Discord webhooks already there.</li>
           <li>If the Loot section has its own address under Webhook Overrides, add your link there too: Dink then skips the primary list for loot.</li>
-          <li>Turn on Loot, and set Min Loot Value low enough for the bingo items (0 counts everything).</li>
+          <li>Turn on Loot.</li>
+          <li>
+            Under Advanced, paste your link with <code className="font-body">/config</code> added at the end into Dynamic Config
+            URL. Dink then always reports the items on current bingo boards, and keeps that list up to date by itself.
+          </li>
+          <li>
+            Also under Advanced, tick Import Policy: Overwrite Item Lists, so items from finished boards drop off. Skip this if
+            you keep your own Item Allowlist: it would be replaced.
+          </li>
+          <li>
+            Set Min Loot Value to your usual amount, not 0: bingo items are sent whatever their value, and 0 sends every
+            single kill.
+          </li>
           <li>
             For a picture with each drop, keep Send Image on. Under Advanced, set Screenshot Scale to 50–75% (very large
             screenshots are rejected, and the drop with them) and turn on Hide Chat in Images.

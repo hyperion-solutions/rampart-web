@@ -29,4 +29,10 @@ Not captured yet: built from Dink's documented format (pajlads/DinkPlugin, `docs
 - **Often multipart:** with a screenshot, the JSON is in `payload_json` and the image in `file` (ignored).
 - **Item ids** can be noted or variant ids; bingo maps them to canonical ids.
 
+## Dynamic Config URL (#106, decision 0006)
+
+- Dink imports a flat JSON object of setting names (e.g. `{"lootItemAllowlist": "Raw chicken\nCowhide"}`) from **Advanced → Dynamic Config URL**: on start, when the URL changes, and at login every 3+ hours. Only keys present change.
+- Allow/deny lists are merged unless **Import Policy → Overwrite Item Lists** is ticked. Imported changes show after reopening Dink's settings panel.
+- We serve it at `<Dink link>/config` with only `lootItemAllowlist`.
+
 Do not commit raw payloads: they contain the player's RSN, account hash, Discord id and location.
