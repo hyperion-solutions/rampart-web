@@ -23,7 +23,7 @@ Option 1. Dink `LOOT` notifications sent to a member's link count toward running
 - **Only `LOOT`:** a first-time collection log item also arrives as `LOOT`, so counting `COLLECTION` too would double count. Repeat drops only arrive as `LOOT`.
 - **Stored:** the item, amount, account RSN, time and "From <source>" as the note. Never the full payload or the screenshot.
 
-Members add their link to Dink's **Primary Webhook URLs** (LOGIN uses the **Custom Metadata Handler**), and to the Loot **Webhook Override** if they use one, with **Loot** on and a low **Min Loot Value**. The link page explains this.
+Members add their link to Dink's **Primary Webhook URLs** (LOGIN uses the **Custom Metadata Handler**), and to **Webhook Overrides → Loot Webhook Override** if they use one, with **Loot** on and a low **Min Loot Value**. The link page explains this.
 
 ## Consequences
 

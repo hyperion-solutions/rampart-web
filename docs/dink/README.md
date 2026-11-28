@@ -23,7 +23,7 @@ Real payloads captured from Dink (RuneLite 1.13.8, Dink 1.x) on 2026-11-26, with
 
 Not captured yet: built from Dink's documented format (pajlads/DinkPlugin, `docs/json-examples.md`). Confirm with a real drop.
 
-- **Where to configure:** **Primary Webhook URLs**, or the Loot **Webhook Override** if one is set (an override replaces the primary list for that notifier).
+- **Where to configure:** **Primary Webhook URLs**, or **Webhook Overrides → Loot Webhook Override** if one is set (an override replaces the primary list for loot).
 - **Fields used:** `extra.items[]` (`id`, `quantity`) and `extra.source` (e.g. `Tombs of Amascut`). Ignored: `priceEach`, `name`, `criteria`, `rarity`, `party`, `killCount`, raid metadata, `embeds`.
 - **Sent only above** the loot notifier's **Min Loot Value** (or for allowlisted items).
 - **Often multipart:** with a screenshot, the JSON is in `payload_json` and the image in `file` (ignored).
