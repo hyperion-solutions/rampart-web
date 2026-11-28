@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { ItemIcon, ItemPicker, type PickedItem } from "@/app/_components/item-picker";
@@ -118,7 +119,17 @@ export function BoardEditor({
           if (e.key === "Escape" && selected) focusSquare(selected.row * size + selected.col);
         }}
       >
-        {selected ? (
+        {selected && readOnly ? (
+          <TileSummary
+            boardId={boardId}
+            row={selected.row}
+            col={selected.col}
+            tile={current}
+            items={items}
+            reason={readOnlyReason}
+            onClose={() => setSelected(null)}
+          />
+        ) : selected ? (
           <TilePanel
             // Keyed by the square's saved content too, so the form reloads when the square changes
             // underneath it (fill at random, clear the board, or another admin's save).
@@ -133,12 +144,94 @@ export function BoardEditor({
             onSaved={() => focusSquare(selected.row * size + selected.col + 1)}
           />
         ) : (
-          <p className="text-steel text-shadow-pixel">
-            {readOnly
-              ? (readOnlyReason ?? "These squares can't change.")
-              : "Click a square to fill it. With the keyboard: Tab or the arrow keys move between squares, Enter edits one, Esc goes back."}
-          </p>
+          <div className="space-y-3 text-steel text-shadow-pixel">
+            <p>
+              {readOnly
+                ? `${readOnlyReason ?? "These squares can't change."} Click a square to see what it needs.`
+                : "Click a square to fill it. With the keyboard: Tab or the arrow keys move between squares, Enter edits one, Esc goes back."}
+            </p>
+            {readOnly && <LiveBoardLink boardId={boardId} />}
+          </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+/** Where drops are added and undone once a board has started. */
+function LiveBoardLink({ boardId }: { boardId: string }) {
+  return (
+    <Link href={`/bingo/${boardId}`} className="inline-block font-pixel text-pixel text-lightning text-shadow-pixel hover:text-limestone">
+      Open the live board to add or undo drops
+    </Link>
+  );
+}
+
+/** A locked square (board started or finished): what it needs, with nothing that looks editable. */
+function TileSummary({
+  boardId,
+  row,
+  col,
+  tile,
+  items,
+  reason,
+  onClose,
+}: {
+  boardId: string;
+  row: number;
+  col: number;
+  tile: EditorTile | undefined;
+  items: ItemsById;
+  reason: string | undefined;
+  onClose: () => void;
+}) {
+  const listed = (tile?.itemIds ?? []).flatMap((id) => (items[id] ? [items[id]] : []));
+  const icon = tile?.iconItemId != null && !tile.itemIds.includes(tile.iconItemId) ? items[tile.iconItemId] : undefined;
+  const needs =
+    !tile ? null : tile.rule === "all" ? `needs all ${listed.length}` : tile.quantity > 1 ? `needs ${tile.quantity}` : null;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="font-pixel text-pixel text-brass text-shadow-pixel">
+          {tile ? tile.name : `Row ${row + 1}, column ${col + 1}`}
+        </h3>
+        <button type="button" onClick={onClose} className="font-pixel text-pixel text-steel hover:text-limestone">
+          Close
+        </button>
+      </div>
+
+      {tile ? (
+        <>
+          <p className="font-pixel text-pixel text-gain text-shadow-pixel">
+            {tile.points} points{needs ? ` · ${needs}` : ""}
+          </p>
+          {tile.description && <p className="text-steel text-shadow-pixel">{tile.description}</p>}
+          {listed.length > 0 ? (
+            <div>
+              <p className="text-steel text-shadow-pixel">
+                {tile.rule === "all" ? "All of these are needed:" : listed.length > 1 ? "Any of these counts:" : "Item:"}
+              </p>
+              <ul className="mt-1 space-y-1">
+                {listed.map((item) => (
+                  <li key={item.id} className="flex items-center gap-2">
+                    <ItemIcon item={item} />
+                    <span className="font-pixel text-pixel text-limestone text-shadow-pixel">{item.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-steel text-shadow-pixel">A goal without items{icon ? ` (shown with ${icon.name})` : ""}.</p>
+          )}
+        </>
+      ) : (
+        <p className="text-steel text-shadow-pixel">This square is empty.</p>
+      )}
+
+      <div className="space-y-2 border-t-4 border-obsidian pt-3">
+        <p className="text-steel text-shadow-pixel">{reason ?? "These squares can't change."}</p>
+        <LiveBoardLink boardId={boardId} />
       </div>
     </div>
   );
