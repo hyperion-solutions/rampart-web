@@ -96,15 +96,6 @@ export function UserMenu() {
             Bingo boards
           </Link>
         )}
-        {session.user.isAdmin && (
-          <Link
-            href="/admin/items"
-            onClick={() => menu.current?.removeAttribute("open")}
-            className="px-3 py-2 text-brass hover:bg-rune/30 hover:text-limestone"
-          >
-            Item catalog
-          </Link>
-        )}
         <button
           type="button"
           onClick={() => signOut({ redirectTo: "/" })}
