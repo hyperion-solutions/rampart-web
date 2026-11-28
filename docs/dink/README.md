@@ -19,4 +19,14 @@ Real payloads captured from Dink (RuneLite 1.13.8, Dink 1.x) on 2026-11-26, with
 - **`extra` on `LOGIN`:** `world`, `skills` (`totalLevel`, `totalExperience`, per-skill `levels` and `experience`), `collectionLog`, `combatAchievementPoints`, `achievementDiary`, `achievementDiaryTasks`, `questCount`, `questPoints`, `slayer`, `barbarianAssault`, `pets`.
 - **`embeds`:** Discord-formatted text. Ignore it; Dink's docs say third-party integrations should rely on `extra`.
 
+## LOOT (#32)
+
+Not captured yet: built from Dink's documented format (pajlads/DinkPlugin, `docs/json-examples.md`). Confirm with a real drop.
+
+- **Where to configure:** **Primary Webhook URLs**, or the Loot **Webhook Override** if one is set (an override replaces the primary list for that notifier).
+- **Fields used:** `extra.items[]` (`id`, `quantity`) and `extra.source` (e.g. `Tombs of Amascut`). Ignored: `priceEach`, `name`, `criteria`, `rarity`, `party`, `killCount`, raid metadata, `embeds`.
+- **Sent only above** the loot notifier's **Min Loot Value** (or for allowlisted items).
+- **Often multipart:** with a screenshot, the JSON is in `payload_json` and the image in `file` (ignored).
+- **Item ids** can be noted or variant ids; bingo maps them to canonical ids.
+
 Do not commit raw payloads: they contain the player's RSN, account hash, Discord id and location.

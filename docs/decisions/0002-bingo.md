@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-27
-- **Release:** v0.3 Bingo (#9); automatic tracking in v0.4 (#32)
+- **Release:** v0.3 Bingo (#9); automatic tracking in v0.4 (#32, see 0003)
 
 ## Context
 

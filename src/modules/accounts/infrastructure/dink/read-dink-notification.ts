@@ -1,6 +1,6 @@
 import "server-only";
 import type { DinkNotification } from "../../domain/dink-login";
-import { validateDinkPayload } from "./dink-payload";
+import { validateDinkPayload, validateLootExtra } from "./dink-payload";
 
 /** Dink payloads are a few KB; screenshots go up to 8 MB. LOGIN never has one. */
 const MAX_BODY_BYTES = 10 * 1024 * 1024;
@@ -35,6 +35,18 @@ export async function readDinkNotification(request: Request): Promise<DinkNotifi
   if ("error" in result) return { kind: "invalid", reason: result.error };
   const { payload } = result;
 
+  if (payload.type === "LOOT") {
+    const extra = validateLootExtra(payload.extra);
+    if ("error" in extra) return { kind: "invalid", reason: extra.error };
+    return {
+      kind: "loot",
+      loot: {
+        dinkAccountHash: payload.dinkAccountHash.toLowerCase(),
+        items: extra.loot.items.map((i) => ({ itemId: i.id, quantity: i.quantity })),
+        source: extra.loot.source ? cleanName(extra.loot.source) : null,
+      },
+    };
+  }
   if (payload.type !== "LOGIN") return { kind: "other", type: payload.type };
   return {
     kind: "login",

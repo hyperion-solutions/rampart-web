@@ -6,9 +6,19 @@ export interface DinkLogin {
   readonly clanName: string | null;
 }
 
+/** The parts of a Dink LOOT notification that bingo tracking needs. */
+export interface DinkLoot {
+  readonly dinkAccountHash: string;
+  /** Game item ids as Dink reports them (may be variant ids; bingo maps them to canonical ids). */
+  readonly items: readonly { readonly itemId: number; readonly quantity: number }[];
+  /** What dropped it, e.g. "Tombs of Amascut". */
+  readonly source: string | null;
+}
+
 /** A Dink notification, reduced to what the site acts on. */
 export type DinkNotification =
   | { readonly kind: "login"; readonly login: DinkLogin }
-  /** Any other type (loot, levels, logout...): accepted and ignored until bingo (v0.3). */
+  | { readonly kind: "loot"; readonly loot: DinkLoot }
+  /** Any other type (levels, logout, collection log...): accepted and ignored. */
   | { readonly kind: "other"; readonly type: string }
   | { readonly kind: "invalid"; readonly reason: string };
