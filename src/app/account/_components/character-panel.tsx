@@ -6,9 +6,8 @@ import { formatRelative } from "@/shared/lib/format";
 export type DinkStatus = { readonly kind: "none" } | { readonly kind: "waiting" } | { readonly kind: "seen"; readonly at: Date };
 
 /**
- * The top of My account, like an OSRS character screen: framed avatar, name, Discord rank, Dink
- * status, and Crob the crab keeping watch. Crob: OSRS Wiki animation (Crob.gif), game art © Jagex;
- * still frame for reduced motion.
+ * The top of My account, like an OSRS character screen: framed avatar, name, Discord rank and Dink
+ * status.
  */
 export function CharacterPanel({
   name,
@@ -29,8 +28,8 @@ export function CharacterPanel({
   actions: React.ReactNode;
 }) {
   return (
-    <div className="pixel-box relative overflow-hidden p-6">
-      <div className="flex flex-wrap items-center gap-6 pr-0 sm:pr-24">
+    <div className="pixel-box p-6">
+      <div className="flex flex-wrap items-center gap-6">
         <div className="shrink-0 border-4 border-black bg-obsidian p-1 shadow-[inset_0_0_0_2px_var(--color-mortar)]">
           {image ? (
             <Image src={image} alt="" width={96} height={96} className="block size-24" />
@@ -57,10 +56,6 @@ export function CharacterPanel({
         </div>
         <div className="flex gap-3">{actions}</div>
       </div>
-      <picture className="pointer-events-none absolute right-4 bottom-2 hidden sm:block">
-        <source media="(prefers-reduced-motion: reduce)" srcSet="/sprites/crob-still.png" />
-        <img src="/sprites/crob.webp" alt="" width={84} height={96} className="block" />
-      </picture>
     </div>
   );
 }
