@@ -67,7 +67,6 @@ import { FillBoardRandomly } from "@/modules/bingo/application/fill-board";
 import { DrizzleRandomItemPicker } from "@/modules/items/infrastructure/db/drizzle-random-item-picker";
 import { CreateBoard } from "@/modules/bingo/application/create-board";
 import { GetBoardOverview } from "@/modules/bingo/application/get-board-overview";
-import { GetMyBingo } from "@/modules/bingo/application/get-my-bingo";
 import { ListBoards } from "@/modules/bingo/application/list-boards";
 import { SaveTile } from "@/modules/bingo/application/save-tile";
 import { UpdateBoard } from "@/modules/bingo/application/update-board";
@@ -142,7 +141,6 @@ export function createContainer() {
       listTrackedItemIds: new ListTrackedItemIds(bingoBoards, bingoTiles),
       getBoardVersion: new GetBoardVersion(bingoBoards, new DrizzleBoardActivity(getBingoDb)),
       getBoardOverview,
-      getMyBingo: new GetMyBingo(bingoBoards, bingoTeams, getBoardOverview),
       saveTile: new SaveTile(bingoBoards, bingoTiles),
       clearTile: new ClearTile(bingoBoards, bingoTiles),
       clearBoard: new ClearBoard(bingoBoards, bingoTiles),
