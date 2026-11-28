@@ -34,12 +34,15 @@ export function BoardEditor({
   tiles,
   items,
   readOnly,
+  readOnlyReason,
 }: {
   boardId: string;
   size: number;
   tiles: readonly EditorTile[];
   items: ItemsById;
   readOnly: boolean;
+  /** Shown instead of editing hints when `readOnly`. */
+  readOnlyReason?: string;
 }) {
   const [selected, setSelected] = useState<{ row: number; col: number } | null>(null);
   const byPosition = new Map(tiles.map((t) => [`${t.row}:${t.col}`, t]));
@@ -132,7 +135,7 @@ export function BoardEditor({
         ) : (
           <p className="text-steel text-shadow-pixel">
             {readOnly
-              ? "This board is finished, so its squares can't change."
+              ? (readOnlyReason ?? "These squares can't change.")
               : "Click a square to fill it. With the keyboard: Tab or the arrow keys move between squares, Enter edits one, Esc goes back."}
           </p>
         )}

@@ -24,6 +24,7 @@ export function BoardForm({
   boardId,
   initial,
   sizeLocked = false,
+  startLocked = false,
 }: {
   action: Action;
   submitLabel: string;
@@ -37,6 +38,8 @@ export function BoardForm({
     bonuses: { row: number; column: number; diagonal: number; blackout: number };
   };
   sizeLocked?: boolean;
+  /** The board has started: the start and the bonuses are fixed (they decide scores). */
+  startLocked?: boolean;
 }) {
   const [state, formAction, pending] = useActionState<BoardFormState, FormData>(action, null);
   const [startsAt, setStartsAt] = useState(() =>
@@ -84,7 +87,14 @@ export function BoardForm({
         </label>
         <label className="block">
           <span className="font-pixel text-pixel text-brass text-shadow-pixel">Starts</span>
-          <input type="datetime-local" required value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className={inputClass} />
+          <input
+            type="datetime-local"
+            required
+            value={startsAt}
+            onChange={(e) => setStartsAt(e.target.value)}
+            readOnly={startLocked}
+            className={`${inputClass} ${startLocked ? "cursor-not-allowed opacity-60" : ""}`}
+          />
         </label>
         <label className="block">
           <span className="font-pixel text-pixel text-brass text-shadow-pixel">Ends</span>
@@ -106,7 +116,15 @@ export function BoardForm({
           ).map(([name, label, value]) => (
             <label key={name} className="block">
               <span className="font-pixel text-pixel text-limestone text-shadow-pixel">{label}</span>
-              <input type="number" name={name} min={0} max={10000} defaultValue={value ?? 0} className={inputClass} />
+              <input
+                type="number"
+                name={name}
+                min={0}
+                max={10000}
+                defaultValue={value ?? 0}
+                readOnly={startLocked}
+                className={`${inputClass} ${startLocked ? "cursor-not-allowed opacity-60" : ""}`}
+              />
             </label>
           ))}
         </div>
@@ -115,7 +133,13 @@ export function BoardForm({
           completing every tile.
         </p>
       </fieldset>
-      {sizeLocked && <p className="text-steel text-shadow-pixel">The size can only change while the board is a draft.</p>}
+      {startLocked ? (
+        <p className="text-steel text-shadow-pixel">
+          The board has started: only the title, rules and end date can change. The start, size and bonuses decide scores.
+        </p>
+      ) : (
+        sizeLocked && <p className="text-steel text-shadow-pixel">The size can only change while the board is a draft.</p>
+      )}
 
       {state?.error && (
         <p role="alert" className="bg-banner/30 px-4 py-3 text-limestone text-shadow-pixel">

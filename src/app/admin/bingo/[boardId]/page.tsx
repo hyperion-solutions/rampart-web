@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { container } from "@/composition/container";
 import { requireAdmin } from "@/composition/require-admin";
+import { isLocked, lockedReason } from "@/modules/bingo/domain/board";
 import { formatDateTime } from "@/shared/lib/format";
 import { SectionHeading } from "@/shared/ui/section-heading";
 import { changeBoardStatusAction, updateBoardAction } from "../actions";
@@ -29,6 +30,8 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
   const overview = await container.bingo.getBoardOverview.execute(boardId, { includeDrafts: true }).catch(() => null);
   if (!overview) notFound();
   const { board, tiles, maxPoints, teams, members } = overview;
+  // Squares and scoring are fixed once the board is live and has started (or finished).
+  const locked = isLocked(board);
   const players = new Map(
     (await container.bingo.getPlayers.execute(members.map((m) => m.userId))).map((p) => [p.userId, p]),
   );
@@ -70,7 +73,7 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
         </div>
       </div>
 
-      {tiles.length < board.size * board.size && (
+      {!locked && tiles.length < board.size * board.size && (
         <p role="status" className="bg-brass/15 px-4 py-3 text-limestone text-shadow-pixel">
           {board.size * board.size - tiles.length} square{board.size * board.size - tiles.length === 1 ? " is" : "s are"} empty.
           Empty squares can&apos;t be completed, so rows, columns and diagonals through them never earn a bonus, and the
@@ -86,7 +89,8 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
         <BoardEditor
           boardId={board.id}
           size={board.size}
-          readOnly={board.status === "finished"}
+          readOnly={locked}
+          readOnlyReason={locked ? lockedReason(board) : undefined}
           items={items}
           tiles={tiles.map((t) => ({
             row: t.row,
@@ -122,6 +126,7 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
               submitLabel="Save details"
               boardId={board.id}
               sizeLocked={board.status !== "draft"}
+              startLocked={locked}
               initial={{
                 title: board.title,
                 rules: board.rules,
