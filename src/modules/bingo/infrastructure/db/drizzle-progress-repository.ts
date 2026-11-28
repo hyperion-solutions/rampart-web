@@ -1,9 +1,10 @@
 import "server-only";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { users } from "@/modules/accounts/infrastructure/db/schema";
 import type { NewProgressEntry, ProgressEntry } from "../../domain/progress";
 import type { BingoHistoryEraser, ProgressRepository } from "../../domain/repositories";
+import type { StoredScreenshot } from "../../domain/screenshot-store";
 import type { BingoDb } from "./client";
 import { bingoCompletions, bingoTeams, bingoTileProgress } from "./schema";
 
@@ -40,6 +41,8 @@ export class DrizzleProgressRepository implements ProgressRepository, BingoHisto
       addedBy: e.addedBy,
       addedByName: r.addedByName,
       note: e.note,
+      screenshotUrl: e.screenshotUrl,
+      thumbnailUrl: e.thumbnailUrl,
       addedAt: e.addedAt,
     };
   }
@@ -59,8 +62,18 @@ export class DrizzleProgressRepository implements ProgressRepository, BingoHisto
     return rows.map(DrizzleProgressRepository.toEntry);
   }
 
-  async add(entry: NewProgressEntry): Promise<void> {
-    await this.db().insert(bingoTileProgress).values(entry);
+  async add(entry: NewProgressEntry): Promise<string> {
+    const [row] = await this.db().insert(bingoTileProgress).values(entry).returning({ id: bingoTileProgress.id });
+    if (!row) throw new Error(`Could not add progress for team ${entry.teamId} on tile ${entry.tileId}`);
+    return row.id;
+  }
+
+  async attachScreenshot(entryIds: readonly string[], screenshot: StoredScreenshot): Promise<void> {
+    if (entryIds.length === 0) return;
+    await this.db()
+      .update(bingoTileProgress)
+      .set({ screenshotUrl: screenshot.url, thumbnailUrl: screenshot.thumbnailUrl })
+      .where(inArray(bingoTileProgress.id, [...entryIds]));
   }
 
   async removeLast(teamId: string, tileId: string): Promise<boolean> {

@@ -16,6 +16,11 @@ export const env = {
   get authDiscordSecret() { return required("AUTH_DISCORD_SECRET"); },
   /** Protects scheduled jobs (Vercel Cron sends it as a Bearer token). */
   get cronSecret() { return required("CRON_SECRET"); },
+  /**
+   * Vercel Blob store for drop screenshots (docs/decisions/0005). Set when the store is connected;
+   * the SDK authenticates with the function's Vercel OIDC token. Unset: screenshots are not stored.
+   */
+  blobStoreId: process.env.BLOB_STORE_ID,
   /** Preview deploys only: production auth URL that relays Discord sign-ins back to the preview. */
   authRedirectProxyUrl: process.env.AUTH_REDIRECT_PROXY_URL,
 };

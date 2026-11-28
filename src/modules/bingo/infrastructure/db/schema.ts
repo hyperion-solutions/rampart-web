@@ -168,6 +168,9 @@ export const bingoTileProgress = pgTable(
     /** The admin who added it; null for Dink. */
     addedBy: uuid("added_by").references(() => users.id, { onDelete: "set null" }),
     note: text("note"),
+    /** Resized Dink screenshot of the drop, in Vercel Blob (docs/decisions/0005). */
+    screenshotUrl: text("screenshot_url"),
+    thumbnailUrl: text("thumbnail_url"),
     addedAt: timestamp("added_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [

@@ -14,6 +14,7 @@ import { DrizzleLinkClaimRepository } from "@/modules/accounts/infrastructure/db
 import { CheckUserExists } from "@/modules/accounts/application/check-user-exists";
 import { IdentifyDinkAccount } from "@/modules/accounts/application/identify-dink-account";
 import { RecordDinkDrops } from "@/modules/bingo/application/record-dink-drops";
+import { VercelBlobScreenshotStore } from "@/modules/bingo/infrastructure/screenshots/vercel-blob-screenshot-store";
 import { GetBoardVersion } from "@/modules/bingo/application/get-board-version";
 import { DrizzleBoardActivity } from "@/modules/bingo/infrastructure/db/drizzle-board-activity";
 import { DrizzleCanonicalItemLookup } from "@/modules/items/infrastructure/db/drizzle-canonical-item-lookup";
@@ -143,6 +144,8 @@ export function createContainer() {
         bingoTiles,
         new DrizzleCanonicalItemLookup(getItemsDb),
         addTileProgress,
+        bingoProgress,
+        env.blobStoreId ? new VercelBlobScreenshotStore(env.blobStoreId) : null,
       ),
       undoLastProgress: new UndoLastProgress(bingoBoards, bingoTiles, bingoTeams, bingoProgress, bingoCompletions),
       setTeamCaptain: new SetTeamCaptain(bingoBoards, bingoTeams),

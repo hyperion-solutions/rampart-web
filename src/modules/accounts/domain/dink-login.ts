@@ -13,6 +13,8 @@ export interface DinkLoot {
   readonly items: readonly { readonly itemId: number; readonly quantity: number }[];
   /** What dropped it, e.g. "Tombs of Amascut". */
   readonly source: string | null;
+  /** Dink's screenshot of the drop (PNG or JPEG bytes), when "Send Image" is on. */
+  readonly screenshot: Uint8Array | null;
 }
 
 /** A Dink notification, reduced to what the site acts on. */
