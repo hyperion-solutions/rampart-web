@@ -17,7 +17,8 @@ Vercel Functions on Hobby accept request bodies up to **4.5 MB**. Dink screensho
 
 - **Store only screenshots of drops that count.** When `RecordDinkDrops` counts a drop and the request has a screenshot, the site stores it and links it to the progress entry. Loot that doesn't count is never stored.
 - **Resize on upload** with sharp (ships with Next.js): a WebP up to 1280 px wide (about 100 to 200 KB) and a 320 px thumbnail (about 15 KB). The original PNG is never stored. 500 drops take about 50 to 100 MB, about 5 to 10% of the included storage.
-- **Vercel Blob**, behind a `ScreenshotStore` port in the bingo module, so moving to S3 or R2 later is a new adapter. Blob paths are random and unguessable; the board page shows them only to signed-in members.
+- **Vercel Blob, public store** (region iad1, next to our functions and database), behind a `ScreenshotStore` port in the bingo module, so moving to S3 or R2 later is a new adapter. Blob paths are random and unguessable, and only the members-only board page shows them.
+- **Why public, not private:** a private store needs every view to go through one of our functions, so each view costs a function call and counts against the 10,000 reads a month (Blob stops for 30 days past that). Public images are served and cached by the CDN. The risk is that anyone *given* a link can open it, which is no worse than sharing the screenshot itself; Hide Chat in Images and the 30-day retention keep what's exposed small.
 - **Retention:** a board's screenshots are deleted 30 days after it's finished (by the existing cron). Deleting a member's data deletes their screenshots straight away.
 - **Upload failure is safe:** if storing fails, the drop still counts, without a picture.
 - **Members' Dink setup:** recommend **Screenshot Scale** at 50 to 75% and **Hide Chat in Images**, to stay under the 4.5 MB limit and keep chat out of pictures.
