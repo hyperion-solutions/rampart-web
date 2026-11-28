@@ -59,7 +59,10 @@ export default async function LinkAccountPage() {
         </p>
         <ol className="list-inside list-decimal space-y-1 text-limestone text-shadow-pixel">
           <li>In Dink&apos;s settings, paste your link into Primary Webhook URLs, on its own line. Keep any Discord webhooks already there.</li>
-          <li>If the Loot section has its own address under Webhook Overrides, add your link there too: Dink then skips the primary list for loot.</li>
+          <li>
+            Open the Webhook Overrides section, just below. If Loot Webhook Override has an address, add your link there too,
+            on its own line: loot then goes only to that box, not to Primary Webhook URLs.
+          </li>
           <li>Turn on Loot.</li>
           <li>
             For a picture with each drop, keep Send Image on. Under Advanced, set Screenshot Scale to 50–75% (very large
