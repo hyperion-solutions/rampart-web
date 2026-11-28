@@ -12,6 +12,9 @@ import { ListPendingClaims } from "@/modules/accounts/application/list-pending-c
 import { SubmitLinkClaim } from "@/modules/accounts/application/submit-link-claim";
 import { DrizzleLinkClaimRepository } from "@/modules/accounts/infrastructure/db/drizzle-link-claim-repository";
 import { CheckUserExists } from "@/modules/accounts/application/check-user-exists";
+import { IdentifyDinkAccount } from "@/modules/accounts/application/identify-dink-account";
+import { RecordDinkDrops } from "@/modules/bingo/application/record-dink-drops";
+import { DrizzleCanonicalItemLookup } from "@/modules/items/infrastructure/db/drizzle-canonical-item-lookup";
 import { DeleteMyAccount } from "@/modules/accounts/application/delete-my-account";
 import { GetMyAccountsOverview } from "@/modules/accounts/application/get-my-accounts-overview";
 import { GetLinkToken } from "@/modules/accounts/application/get-link-token";
@@ -82,6 +85,7 @@ export function createContainer() {
   const bingoCompletions = new DrizzleCompletionRepository(getBingoDb);
   const bingoPlayers = new DrizzlePlayerDirectory(getBingoDb);
   const bingoProgress = new DrizzleProgressRepository(getBingoDb);
+  const addTileProgress = new AddTileProgress(bingoBoards, bingoTiles, bingoTeams, bingoProgress, bingoCompletions, bingoPlayers);
   return {
     getClanOverview: new GetClanOverview(clanRepository),
     getTopGainers: new GetTopGainers(clanRepository),
@@ -95,6 +99,7 @@ export function createContainer() {
     signInWithDiscord: new SignInWithDiscord(clanMembership, users),
     deleteMyAccount: new DeleteMyAccount(users),
     checkUserExists: new CheckUserExists(users),
+    identifyDinkAccount: new IdentifyDinkAccount(linkTokens, linkedAccounts),
     checkClanMembership: new CheckClanMembership(clanMembership),
     createLinkToken: new CreateLinkToken(linkTokens),
     revokeLinkToken: new RevokeLinkToken(linkTokens),
@@ -128,7 +133,14 @@ export function createContainer() {
       removeTeamMember: new RemoveTeamMember(bingoBoards, bingoTeams),
       searchPlayers: new SearchPlayers(bingoPlayers),
       getPlayers: new GetPlayers(bingoPlayers),
-      addTileProgress: new AddTileProgress(bingoBoards, bingoTiles, bingoTeams, bingoProgress, bingoCompletions, bingoPlayers),
+      addTileProgress,
+      recordDinkDrops: new RecordDinkDrops(
+        bingoBoards,
+        bingoTeams,
+        bingoTiles,
+        new DrizzleCanonicalItemLookup(getItemsDb),
+        addTileProgress,
+      ),
       undoLastProgress: new UndoLastProgress(bingoBoards, bingoTiles, bingoTeams, bingoProgress, bingoCompletions),
       setTeamCaptain: new SetTeamCaptain(bingoBoards, bingoTeams),
       forgetPlayer: new ForgetBingoPlayer(bingoProgress),

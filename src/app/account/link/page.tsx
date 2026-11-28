@@ -51,6 +51,22 @@ export default async function LinkAccountPage() {
 
       <LinkWizard hasLink={token !== null} attempt={attempt} claims={claimList} />
 
+      <div className="pixel-box space-y-3 p-6">
+        <h2 className="font-pixel text-pixel text-brass text-shadow-pixel">Count your bingo drops automatically</h2>
+        <p className="text-steel text-shadow-pixel">
+          With the same link, Dink can report your drops. While a bingo board is running, drops on your team&apos;s tiles count
+          by themselves, from any of your linked accounts.
+        </p>
+        <ol className="list-inside list-decimal space-y-1 text-limestone text-shadow-pixel">
+          <li>In Dink&apos;s settings, paste your link into Primary Webhook URLs, on its own line. Keep any Discord webhooks already there.</li>
+          <li>If the Loot section has its own address under Webhook Overrides, add your link there too: Dink then skips the primary list for loot.</li>
+          <li>Turn on Loot, and set Min Loot Value low enough for the bingo items (0 counts everything).</li>
+        </ol>
+        <p className="text-steel text-shadow-pixel">
+          Only drops between a board&apos;s start and end count. Admins and your captain can still add or undo drops by hand.
+        </p>
+      </div>
+
       {token && (
         <div className="pixel-box space-y-2 p-6">
           <h2 className="font-pixel text-pixel text-brass text-shadow-pixel">Your Dink link</h2>
