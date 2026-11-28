@@ -22,23 +22,35 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   if (notification.kind === "invalid") {
     return NextResponse.json({ error: `Invalid Dink payload: ${notification.reason}` }, { status: 400 });
   }
-  if (notification.kind === "other") return NextResponse.json({ ignored: notification.type });
+  if (notification.kind === "other") {
+    console.info(`[dink] ${notification.type} ignored`);
+    return NextResponse.json({ ignored: notification.type });
+  }
 
   if (notification.kind === "loot") {
     const { loot } = notification;
     const sender = await container.identifyDinkAccount.execute(token, loot.dinkAccountHash);
     if (sender.status === "unknown-token") return NextResponse.json({ error: "Unknown link" }, { status: 404 });
+    // Item ids aren't personal and show what Dink sent, so the log can explain a missed drop.
+    const items = loot.items.map((i) => `${i.itemId}x${i.quantity}`).join(",");
     // Dink only needs a 2xx; say why nothing happened, for anyone testing their setup.
-    if (sender.status === "not-linked") return NextResponse.json({ ignored: "LOOT", reason: "account not linked" });
+    if (sender.status === "not-linked") {
+      console.info(`[dink] LOOT not counted: account not linked (items ${items})`);
+      return NextResponse.json({ ignored: "LOOT", reason: "account not linked" });
+    }
 
-    const recorded = await container.bingo.recordDinkDrops.execute({
+    const { outcome, recorded } = await container.bingo.recordDinkDrops.execute({
       userId: sender.userId,
       rsn: sender.rsn,
       items: loot.items,
       source: loot.source,
     });
-    if (recorded.length > 0) console.info(`[dink] loot counted on ${recorded.length} tile(s)`);
-    return NextResponse.json({ counted: recorded.length });
+    console.info(
+      outcome === "counted"
+        ? `[dink] LOOT counted on ${recorded.length} tile(s) (items ${items})`
+        : `[dink] LOOT not counted: ${outcome} (items ${items})`,
+    );
+    return NextResponse.json({ counted: recorded.length, outcome });
   }
 
   const result = await container.linkAccountFromDink.execute(token, notification.login);

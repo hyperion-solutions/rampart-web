@@ -17,6 +17,20 @@ export interface RecordedDrop {
   readonly complete: boolean;
 }
 
+/** Why loot did or didn't count, for the logs (members test their Dink setup with real drops). */
+export type DinkDropsOutcome =
+  | "counted"
+  | "no-running-board"
+  | "not-on-a-team"
+  | "item-not-on-a-tile"
+  /** On a tile, but the tile is complete or an "all" tile already has the item. */
+  | "nothing-new";
+
+export interface DinkDropsResult {
+  readonly outcome: DinkDropsOutcome;
+  readonly recorded: readonly RecordedDrop[];
+}
+
 /**
  * Counts a member's Dink loot on every live bingo board they play, while the board is running
  * (start to end). Each item that's on a tile is added like a manual drop (same rules for
@@ -31,24 +45,27 @@ export class RecordDinkDrops {
     private readonly addProgress: AddTileProgress,
   ) {}
 
-  async execute(input: DinkDropsInput, now: Date = new Date()): Promise<RecordedDrop[]> {
+  async execute(input: DinkDropsInput, now: Date = new Date()): Promise<DinkDropsResult> {
     const running = (await this.boards.list(["live"])).filter((b) => b.startsAt <= now && now <= b.endsAt);
-    if (running.length === 0 || input.items.length === 0) return [];
+    if (running.length === 0) return { outcome: "no-running-board", recorded: [] };
 
     const canonical = await this.itemIds.canonicalIds(input.items.map((i) => i.itemId));
     const drops = input.items.flatMap((i) => {
       const itemId = canonical.get(i.itemId);
       return itemId === undefined ? [] : [{ itemId, quantity: i.quantity }];
     });
-    if (drops.length === 0) return [];
 
     const recorded: RecordedDrop[] = [];
+    let onATeam = false;
+    let onATile = false;
     for (const board of running) {
       const member = (await this.teams.listMembers(board.id)).find((m) => m.userId === input.userId);
       if (!member) continue;
+      onATeam = true;
       const tiles = await this.tiles.listForBoard(board.id);
       for (const drop of drops) {
         for (const tile of tiles.filter((t) => t.itemIds.includes(drop.itemId))) {
+          onATile = true;
           // One at a time: two items in one loot can land on the same tile.
           const result = await this.addProgress.execute(
             {
@@ -70,6 +87,8 @@ export class RecordDinkDrops {
         }
       }
     }
-    return recorded;
+    const outcome: DinkDropsOutcome =
+      recorded.length > 0 ? "counted" : !onATeam ? "not-on-a-team" : !onATile ? "item-not-on-a-tile" : "nothing-new";
+    return { outcome, recorded };
   }
 }
