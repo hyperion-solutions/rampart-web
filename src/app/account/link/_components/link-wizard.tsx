@@ -19,6 +19,10 @@ export interface WizardAttempt {
 
 type Step = "intro" | "install" | "create" | "paste" | "login" | "result" | "manual";
 
+/** "Qphy", "Qphy and Alt", "Qphy, Alt and Main". */
+const listNames = (names: readonly string[]) =>
+  names.length <= 1 ? (names[0] ?? "") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+
 /** The Dink path, in order. The intro, result and manual steps sit outside the count. */
 const DINK_STEPS: readonly Step[] = ["install", "create", "paste", "login"];
 
@@ -49,10 +53,13 @@ function load(): Saved | null {
 export function LinkWizard({
   hasLink,
   attempt,
+  linkedRsns,
   claims,
 }: {
   hasLink: boolean;
   attempt: WizardAttempt | null;
+  /** Accounts already linked to the member: the guide starts from these, not from the saved step. */
+  linkedRsns: readonly string[];
   /** The member's manual link requests, rendered on the server. */
   claims: React.ReactNode;
 }) {
@@ -102,7 +109,30 @@ export function LinkWizard({
         </p>
       )}
 
-      {step === "intro" && (
+      {step === "intro" && linkedRsns.length > 0 && (
+        <BobDialogue
+          actions={
+            <>
+              {/* Dink's settings are the same for every account in RuneLite: logging in on the other one is enough. */}
+              <DialogueOption onClick={hasLink ? startWaiting : () => go("install")}>Link another account</DialogueOption>
+              <DialogueOption onClick={() => go("manual")}>Ask an admin instead</DialogueOption>
+              <Link href="/account" className="font-pixel text-pixel text-lightning text-shadow-pixel hover:text-limestone">
+                My account
+              </Link>
+            </>
+          }
+        >
+          <p>
+            Meow! You&apos;ve linked <span className="font-pixel text-pixel text-gain">{listNames(linkedRsns)}</span> to the
+            clan site.
+          </p>
+          <p>
+            Got another clan account? {hasLink ? "With your link in Dink, just log in on that account." : "Set up Dink once and log in on it."}
+          </p>
+        </BobDialogue>
+      )}
+
+      {step === "intro" && linkedRsns.length === 0 && (
         <BobDialogue
           actions={
             <>
