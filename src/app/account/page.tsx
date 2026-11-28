@@ -1,10 +1,11 @@
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/composition/auth";
 import { container } from "@/composition/container";
 import { SectionHeading } from "@/shared/ui/section-heading";
 import { AccountCard } from "./_components/account-card";
+import { CharacterPanel, type DinkStatus } from "./_components/character-panel";
+import { YourBingo } from "./_components/your-bingo";
 import { DeleteAccountButton } from "./_components/delete-account-button";
 
 export const metadata = { title: "My account | Rampart" };
@@ -14,7 +15,19 @@ export default async function AccountPage() {
   if (!session?.user) redirect("/signin?callbackUrl=/account");
 
   const { name, image, rank, rankIconUrl } = session.user;
-  const accounts = session.user.id ? await container.getMyAccountsOverview.execute(session.user.id) : [];
+  const userId = session.user.id;
+  const [accounts, token, bingo] = userId
+    ? await Promise.all([
+        container.getMyAccountsOverview.execute(userId),
+        container.getLinkToken.execute(userId),
+        container.bingo.getMyBingo.execute(userId),
+      ])
+    : [[], null, null];
+  const dink: DinkStatus = !token
+    ? { kind: "none" }
+    : token.lastUsedAt
+      ? { kind: "seen", at: token.lastUsedAt }
+      : { kind: "waiting" };
 
   async function signOutAction() {
     "use server";
@@ -24,23 +37,24 @@ export default async function AccountPage() {
   return (
     <section className="mx-auto max-w-4xl">
       <SectionHeading eyebrow="Signed in with Discord" title="My account" />
-      <div className="pixel-box flex flex-wrap items-center gap-5 p-6">
-        {image && <Image src={image} alt="" width={64} height={64} className="size-16 border-4 border-black" />}
-        <div className="flex-1">
-          <p className="font-pixel text-pixel text-limestone text-shadow-pixel">{name}</p>
-          <p className="flex items-center gap-2 text-steel text-shadow-pixel">
-            {rankIconUrl && (
-              // The rank's Discord role icon (public/icons/ranks), served as the original PNG.
-              <Image src={rankIconUrl} alt="" width={24} height={24} unoptimized />
-            )}
-            {rank ? `${rank} in the Rampart Discord` : "Rampart Discord member"}
-          </p>
-        </div>
-        <form action={signOutAction}>
-          <button type="submit" className="pixel-btn bg-granite text-brass">
-            Sign out
-          </button>
-        </form>
+      <CharacterPanel
+        name={name ?? "Member"}
+        image={image ?? null}
+        rank={rank ?? null}
+        rankIconUrl={rankIconUrl ?? null}
+        linkedCount={accounts.length}
+        dink={dink}
+        actions={
+          <form action={signOutAction}>
+            <button type="submit" className="pixel-btn bg-granite text-brass">
+              Sign out
+            </button>
+          </form>
+        }
+      />
+
+      <div className="mt-10">
+        <YourBingo bingo={bingo} />
       </div>
 
       <div className="mt-10">
