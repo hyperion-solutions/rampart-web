@@ -86,6 +86,8 @@ export default async function BingoBoardPage({
             addedByName: e.addedByName,
             addedByCaptain: e.addedBy !== null && e.addedBy === selectedTeam?.captainUserId,
             note: e.note,
+            screenshotUrl: e.screenshotUrl,
+            thumbnailUrl: e.thumbnailUrl,
             addedAt: e.addedAt.toISOString(),
           })),
         },

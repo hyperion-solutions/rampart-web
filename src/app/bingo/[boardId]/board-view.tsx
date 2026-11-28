@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { ItemIcon, type PickedItem } from "@/app/_components/item-picker";
 import { addDropAction, undoLastDropAction } from "../actions";
+import { DropScreenshot } from "./drop-screenshot";
 
 export interface ViewTile {
   readonly id: string;
@@ -30,6 +31,9 @@ export interface ViewEntry {
   /** Added by the team's (current) captain, not an admin. */
   readonly addedByCaptain: boolean;
   readonly note: string | null;
+  /** Dink's screenshot of the drop, resized (docs/decisions/0005), and its thumbnail. */
+  readonly screenshotUrl: string | null;
+  readonly thumbnailUrl: string | null;
   /** ISO timestamp. */
   readonly addedAt: string;
 }
@@ -97,7 +101,8 @@ export function BoardView({
       if (!inside(e.target)) setOpenId(null);
     };
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenId(null);
+      // An open screenshot dialog handles its own Escape.
+      if (e.key === "Escape" && !document.querySelector("dialog[open]")) setOpenId(null);
     };
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
@@ -340,6 +345,13 @@ function TileDetails({
                     {new Date(e.addedAt).toLocaleString()}
                   </span>
                   {e.note && <span className="block text-steel">{linkify(e.note)}</span>}
+                  {e.screenshotUrl && e.thumbnailUrl && (
+                    <DropScreenshot
+                      url={e.screenshotUrl}
+                      thumbnailUrl={e.thumbnailUrl}
+                      label={`${who(e.obtainedByName, e.obtainedRsn)}: ${e.itemName ?? tile.name}`}
+                    />
+                  )}
                 </li>
               ))}
             </ul>
