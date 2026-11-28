@@ -15,6 +15,8 @@ import { CheckUserExists } from "@/modules/accounts/application/check-user-exist
 import { IdentifyDinkAccount } from "@/modules/accounts/application/identify-dink-account";
 import { RecordDinkDrops } from "@/modules/bingo/application/record-dink-drops";
 import { VercelBlobScreenshotStore } from "@/modules/bingo/infrastructure/screenshots/vercel-blob-screenshot-store";
+import { CleanUpScreenshots } from "@/modules/bingo/application/clean-up-screenshots";
+import { DrizzleScreenshotIndex } from "@/modules/bingo/infrastructure/db/drizzle-screenshot-index";
 import { GetBoardVersion } from "@/modules/bingo/application/get-board-version";
 import { DrizzleBoardActivity } from "@/modules/bingo/infrastructure/db/drizzle-board-activity";
 import { DrizzleCanonicalItemLookup } from "@/modules/items/infrastructure/db/drizzle-canonical-item-lookup";
@@ -88,6 +90,8 @@ export function createContainer() {
   const bingoCompletions = new DrizzleCompletionRepository(getBingoDb);
   const bingoPlayers = new DrizzlePlayerDirectory(getBingoDb);
   const bingoProgress = new DrizzleProgressRepository(getBingoDb);
+  const screenshotStore = env.blobStoreId ? new VercelBlobScreenshotStore(env.blobStoreId) : null;
+  const screenshotIndex = new DrizzleScreenshotIndex(getBingoDb);
   const addTileProgress = new AddTileProgress(bingoBoards, bingoTiles, bingoTeams, bingoProgress, bingoCompletions, bingoPlayers);
   return {
     getClanOverview: new GetClanOverview(clanRepository),
@@ -145,11 +149,13 @@ export function createContainer() {
         new DrizzleCanonicalItemLookup(getItemsDb),
         addTileProgress,
         bingoProgress,
-        env.blobStoreId ? new VercelBlobScreenshotStore(env.blobStoreId) : null,
+        screenshotStore,
       ),
       undoLastProgress: new UndoLastProgress(bingoBoards, bingoTiles, bingoTeams, bingoProgress, bingoCompletions),
       setTeamCaptain: new SetTeamCaptain(bingoBoards, bingoTeams),
-      forgetPlayer: new ForgetBingoPlayer(bingoProgress),
+      forgetPlayer: new ForgetBingoPlayer(bingoProgress, screenshotIndex, screenshotStore),
+      /** Null when no Blob store is configured (local development). */
+      cleanUpScreenshots: screenshotStore ? new CleanUpScreenshots(screenshotIndex, screenshotStore) : null,
     },
     unlinkAccount: new UnlinkAccount(linkedAccounts),
     /** Turns a Dink HTTP request into a domain notification (adapter). */
