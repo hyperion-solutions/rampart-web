@@ -1,5 +1,6 @@
 import type { Board, BoardDetails, BoardStatus } from "./board";
 import type { NewProgressEntry, ProgressEntry } from "./progress";
+import type { StoredScreenshot } from "./screenshot-store";
 import type { Completion, CompletionSource } from "./completion";
 import type { Team, TeamMember } from "./team";
 import type { Tile, TileInput } from "./tile";
@@ -61,7 +62,10 @@ export interface CompletionRepository {
 export interface ProgressRepository {
   listForBoard(boardId: string): Promise<ProgressEntry[]>;
   listFor(teamId: string, tileId: string): Promise<ProgressEntry[]>;
-  add(entry: NewProgressEntry): Promise<void>;
+  /** Returns the new entry's id. */
+  add(entry: NewProgressEntry): Promise<string>;
+  /** Links a stored screenshot to entries (one loot can count on several tiles). */
+  attachScreenshot(entryIds: readonly string[], screenshot: StoredScreenshot): Promise<void>;
   /** Removes the newest entry for the team and tile. Returns whether one existed. */
   removeLast(teamId: string, tileId: string): Promise<boolean>;
 }

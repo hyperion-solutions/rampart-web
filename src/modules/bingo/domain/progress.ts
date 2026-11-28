@@ -16,6 +16,9 @@ export interface ProgressEntry {
   readonly addedBy: string | null;
   readonly addedByName: string | null;
   readonly note: string | null;
+  /** Resized screenshot of the drop and its thumbnail, when Dink sent one. */
+  readonly screenshotUrl: string | null;
+  readonly thumbnailUrl: string | null;
   readonly addedAt: Date;
 }
 

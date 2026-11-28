@@ -39,15 +39,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
       return NextResponse.json({ ignored: "LOOT", reason: "account not linked" });
     }
 
-    const { outcome, recorded } = await container.bingo.recordDinkDrops.execute({
+    const { outcome, recorded, screenshot } = await container.bingo.recordDinkDrops.execute({
       userId: sender.userId,
       rsn: sender.rsn,
       items: loot.items,
       source: loot.source,
+      screenshot: loot.screenshot,
     });
     console.info(
       outcome === "counted"
-        ? `[dink] LOOT counted on ${recorded.length} tile(s) (items ${items})`
+        ? `[dink] LOOT counted on ${recorded.length} tile(s) (items ${items}; screenshot ${screenshot})`
         : `[dink] LOOT not counted: ${outcome} (items ${items})`,
     );
     return NextResponse.json({ counted: recorded.length, outcome });

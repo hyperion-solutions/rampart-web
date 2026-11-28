@@ -1,5 +1,6 @@
 import type { ItemIdNormalizer } from "../domain/item-ids";
-import type { BoardRepository, TeamRepository, TileRepository } from "../domain/repositories";
+import type { BoardRepository, ProgressRepository, TeamRepository, TileRepository } from "../domain/repositories";
+import type { ScreenshotStore } from "../domain/screenshot-store";
 import type { AddTileProgress } from "./tile-progress";
 
 export interface DinkDropsInput {
@@ -9,6 +10,8 @@ export interface DinkDropsInput {
   readonly items: readonly { readonly itemId: number; readonly quantity: number }[];
   /** What dropped it, e.g. "Tombs of Amascut". Saved as the drop's note. */
   readonly source: string | null;
+  /** Dink's screenshot (PNG or JPEG bytes): stored, resized, only if the loot counts. */
+  readonly screenshot: Uint8Array | null;
 }
 
 export interface RecordedDrop {
@@ -26,9 +29,13 @@ export type DinkDropsOutcome =
   /** On a tile, but the tile is complete or an "all" tile already has the item. */
   | "nothing-new";
 
+/** What happened to the screenshot: only counted loot with a screenshot is stored. */
+export type ScreenshotOutcome = "stored" | "none" | "not-configured" | "failed";
+
 export interface DinkDropsResult {
   readonly outcome: DinkDropsOutcome;
   readonly recorded: readonly RecordedDrop[];
+  readonly screenshot: ScreenshotOutcome;
 }
 
 /**
@@ -43,11 +50,14 @@ export class RecordDinkDrops {
     private readonly tiles: TileRepository,
     private readonly itemIds: ItemIdNormalizer,
     private readonly addProgress: AddTileProgress,
+    private readonly progress: ProgressRepository,
+    /** Null when no store is configured (e.g. local development): drops still count. */
+    private readonly screenshots: ScreenshotStore | null,
   ) {}
 
   async execute(input: DinkDropsInput, now: Date = new Date()): Promise<DinkDropsResult> {
     const running = (await this.boards.list(["live"])).filter((b) => b.startsAt <= now && now <= b.endsAt);
-    if (running.length === 0) return { outcome: "no-running-board", recorded: [] };
+    if (running.length === 0) return { outcome: "no-running-board", recorded: [], screenshot: "none" };
 
     const canonical = await this.itemIds.canonicalIds(input.items.map((i) => i.itemId));
     const drops = input.items.flatMap((i) => {
@@ -56,6 +66,7 @@ export class RecordDinkDrops {
     });
 
     const recorded: RecordedDrop[] = [];
+    const entryIds: string[] = [];
     let onATeam = false;
     let onATile = false;
     for (const board of running) {
@@ -83,12 +94,29 @@ export class RecordDinkDrops {
             now,
           );
           // Already complete, or an item an "all" tile already has: nothing to add.
-          if (result.ok) recorded.push({ boardId: board.id, tileId: tile.id, complete: result.value.complete });
+          if (result.ok) {
+            recorded.push({ boardId: board.id, tileId: tile.id, complete: result.value.complete });
+            entryIds.push(result.value.entryId);
+          }
         }
       }
     }
     const outcome: DinkDropsOutcome =
       recorded.length > 0 ? "counted" : !onATeam ? "not-on-a-team" : !onATile ? "item-not-on-a-tile" : "nothing-new";
-    return { outcome, recorded };
+    return { outcome, recorded, screenshot: await this.storeScreenshot(input.screenshot, entryIds) };
+  }
+
+  /** One stored copy for all the entries this loot added. Never undoes the drops if it fails. */
+  private async storeScreenshot(image: Uint8Array | null, entryIds: readonly string[]): Promise<ScreenshotOutcome> {
+    if (!image || entryIds.length === 0) return "none";
+    if (!this.screenshots) return "not-configured";
+    try {
+      await this.progress.attachScreenshot(entryIds, await this.screenshots.save(image));
+      return "stored";
+    } catch (error) {
+      // The drops are saved; only the picture is missing. Say why, for the logs.
+      console.warn(`[dink] screenshot not stored: ${error instanceof Error ? error.message : String(error)}`);
+      return "failed";
+    }
   }
 }

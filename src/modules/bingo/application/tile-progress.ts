@@ -45,7 +45,7 @@ export class AddTileProgress {
   async execute(
     input: AddProgressInput,
     now: Date = new Date(),
-  ): Promise<Result<{ done: number; target: number; complete: boolean }>> {
+  ): Promise<Result<{ entryId: string; done: number; target: number; complete: boolean }>> {
     const board = await this.boards.findById(input.boardId);
     if (!board) return fail("That board doesn't exist.");
     if (board.status !== "live") return fail("Drops can only be added while the board is live.");
@@ -92,7 +92,7 @@ export class AddTileProgress {
     const amount = tile.rule === "all" ? 1 : Math.min(input.amount, before.remaining);
     const note = input.note?.trim().slice(0, 300) || null;
     const addedBy = input.actor?.userId ?? null;
-    await this.progress.add({
+    const entryId = await this.progress.add({
       teamId: input.teamId,
       tileId: input.tileId,
       amount,
@@ -116,7 +116,7 @@ export class AddTileProgress {
         completedRsn: input.obtainedRsn,
       });
     }
-    return ok({ done: after.done, target: after.target, complete: after.complete });
+    return ok({ entryId, done: after.done, target: after.target, complete: after.complete });
   }
 }
 

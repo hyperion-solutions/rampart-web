@@ -61,9 +61,14 @@ export default async function LinkAccountPage() {
           <li>In Dink&apos;s settings, paste your link into Primary Webhook URLs, on its own line. Keep any Discord webhooks already there.</li>
           <li>If the Loot section has its own address under Webhook Overrides, add your link there too: Dink then skips the primary list for loot.</li>
           <li>Turn on Loot, and set Min Loot Value low enough for the bingo items (0 counts everything).</li>
+          <li>
+            For a picture with each drop, keep Send Image on. Under Advanced, set Screenshot Scale to 50–75% (very large
+            screenshots are rejected, and the drop with them) and turn on Hide Chat in Images.
+          </li>
         </ol>
         <p className="text-steel text-shadow-pixel">
-          Only drops between a board&apos;s start and end count. Admins and your captain can still add or undo drops by hand.
+          Only drops between a board&apos;s start and end count, and we keep the picture only for drops that count. Admins
+          and your captain can still add or undo drops by hand.
         </p>
       </div>
 

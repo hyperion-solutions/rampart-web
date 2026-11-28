@@ -27,7 +27,7 @@ const stored = [
   },
   {
     what: "Which bingo team you're on, and the drops you get for your team",
-    why: "To run clan bingo events and show the board, scoreboard and who got each drop (your Discord name and RSN). Drops are added by an admin or your team's captain, or reported by Dink while a board is running: then we keep the item, how many, and what dropped it. If you delete your data, your name and RSN are removed from bingo history; your team keeps its points.",
+    why: "To run clan bingo events and show the board, scoreboard and who got each drop (your Discord name and RSN). Drops are added by an admin or your team's captain, or reported by Dink while a board is running: then we keep the item, how many, what dropped it, and a smaller copy of Dink's screenshot if it sent one. Screenshots are kept only for drops that count, can be opened by anyone with their link (we only show it to signed-in members), and are deleted 30 days after the board finishes. If you delete your data, your name and RSN are removed from bingo history; your team keeps its points.",
   },
   {
     what: "A scrambled copy (hash) of your Dink link",
