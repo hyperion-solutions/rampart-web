@@ -11,8 +11,6 @@ export interface LineBonuses {
   readonly blackout: number;
 }
 
-export const NO_BONUSES: LineBonuses = { row: 0, column: 0, diagonal: 0, blackout: 0 };
-
 /** A bingo event: a square grid of tiles, played by teams between two dates. */
 export interface Board {
   readonly id: string;

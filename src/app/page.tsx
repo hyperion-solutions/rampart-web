@@ -31,10 +31,26 @@ const joinSteps = [
   { title: "Pick your roles", body: "Choose roles like @Raiders to get pinged for raids, wilderness bossing and group PvM." },
 ] as const;
 
-const comingSoon = [
-  { title: "Link your account", body: "Sign in and connect your RSN to track your progress on the clan page." },
-  { title: "Clan bingo", body: "Team boards with drops and challenges. Mark tiles and race other teams." },
-  { title: "Events calendar", body: "See upcoming competitions, bossing trips and skilling nights in one place." },
+/** What members can do on the site. `href` null = not built yet. */
+const onTheSite = [
+  {
+    title: "Link your accounts",
+    body: "Sign in with Discord and link your RSNs with the Dink plugin: log in once and it's done. No passwords or codes.",
+    href: "/account/link",
+    cta: "Link your account",
+  },
+  {
+    title: "Clan bingo",
+    body: "Team boards with real drops. With Dink, drops count by themselves, screenshot included, and the board updates live.",
+    href: "/bingo",
+    cta: "See the boards",
+  },
+  {
+    title: "Events calendar",
+    body: "Upcoming competitions, bossing trips and skilling nights in one place.",
+    href: null,
+    cta: null,
+  },
 ] as const;
 
 export default async function HomePage() {
@@ -120,13 +136,20 @@ export default async function HomePage() {
       </section>
 
       <section>
-        <SectionHeading eyebrow="On the way" title="Coming soon" />
+        <SectionHeading eyebrow="Members" title="On the site" />
         <div className="grid gap-4 md:grid-cols-3">
-          {comingSoon.map((f) => (
-            <article key={f.title} className="pixel-box relative p-5">
-              <span className="absolute top-4 right-4 font-pixel text-pixel text-lightning text-shadow-pixel">Soon</span>
+          {onTheSite.map((f) => (
+            <article key={f.title} className="pixel-box relative flex flex-col p-5">
+              {!f.href && (
+                <span className="absolute top-4 right-4 font-pixel text-pixel text-lightning text-shadow-pixel">Soon</span>
+              )}
               <h3 className="font-pixel text-pixel text-brass text-shadow-pixel">{f.title}</h3>
-              <p className="mt-2 text-steel text-shadow-pixel">{f.body}</p>
+              <p className="mt-2 flex-1 text-steel text-shadow-pixel">{f.body}</p>
+              {f.href && (
+                <Link href={f.href} className="mt-4 font-pixel text-pixel text-lightning text-shadow-pixel hover:text-limestone">
+                  {f.cta}
+                </Link>
+              )}
             </article>
           ))}
         </div>
