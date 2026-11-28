@@ -58,8 +58,8 @@ export function CharacterPanel({
         <div className="flex gap-3">{actions}</div>
       </div>
       <picture className="pointer-events-none absolute right-4 bottom-2 hidden sm:block">
-        <source media="(prefers-reduced-motion: reduce)" srcSet="/account/crob-still.png" />
-        <img src="/account/crob.webp" alt="" width={84} height={96} className="block" />
+        <source media="(prefers-reduced-motion: reduce)" srcSet="/sprites/crob-still.png" />
+        <img src="/sprites/crob.webp" alt="" width={84} height={96} className="block" />
       </picture>
     </div>
   );
