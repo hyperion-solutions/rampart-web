@@ -133,7 +133,7 @@ export function createContainer() {
     bingo: {
       createBoard: new CreateBoard(bingoBoards),
       updateBoard: new UpdateBoard(bingoBoards, bingoTiles),
-      changeBoardStatus: new ChangeBoardStatus(bingoBoards),
+      changeBoardStatus: new ChangeBoardStatus(bingoBoards, bingoProgress, bingoCompletions),
       listBoards: new ListBoards(bingoBoards),
       listTrackedItemIds: new ListTrackedItemIds(bingoBoards, bingoTiles),
       getBoardVersion: new GetBoardVersion(bingoBoards, new DrizzleBoardActivity(getBingoDb)),
