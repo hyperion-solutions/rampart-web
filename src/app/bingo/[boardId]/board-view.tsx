@@ -12,6 +12,8 @@ export interface ViewTile {
   readonly name: string;
   readonly points: number;
   readonly quantity: number;
+  /** "any": any items count toward the quantity; "all": every item is needed once. */
+  readonly rule: "any" | "all";
   readonly description: string | null;
   readonly icon: PickedItem | null;
   readonly items: readonly PickedItem[];
@@ -36,11 +38,16 @@ export interface ViewEntry {
 export interface ViewTileState {
   readonly done: number;
   readonly complete: boolean;
+  /** For "all" tiles: the items the team already has. */
+  readonly obtainedItemIds: readonly number[];
   readonly completedAt: string | null;
   readonly completedByName: string | null;
   readonly completedRsn: string | null;
   readonly entries: readonly ViewEntry[];
 }
+
+/** How many drops complete the tile: its quantity, or one of each item for "all" tiles. */
+const targetOf = (tile: ViewTile) => (tile.rule === "all" ? tile.items.length : tile.quantity);
 
 export interface ViewTeamMember {
   readonly userId: string;
@@ -48,7 +55,7 @@ export interface ViewTeamMember {
   readonly rsns: readonly string[];
 }
 
-const EMPTY: ViewTileState = { done: 0, complete: false, completedAt: null, completedByName: null, completedRsn: null, entries: [] };
+const EMPTY: ViewTileState = { done: 0, complete: false, obtainedItemIds: [], completedAt: null, completedByName: null, completedRsn: null, entries: [] };
 
 /** The board grid for one team. Admins add drops while the board is live. */
 export function BoardView({
@@ -108,13 +115,14 @@ export function BoardView({
           if (!tile) return <div key={i} className="aspect-square bg-obsidian/40" aria-hidden />;
           const state = states[tile.id] ?? EMPTY;
           const glowing = state.complete && onLine.has(`${tile.row}:${tile.col}`);
-          const multi = tile.quantity > 1;
+          const target = targetOf(tile);
+          const multi = target > 1;
           return (
             <button
               key={i}
               type="button"
               onClick={() => setOpenId(tile.id)}
-              aria-label={`${tile.name}, ${tile.points} points, ${state.complete ? "completed" : multi ? `${state.done} of ${tile.quantity}` : "not completed"}`}
+              aria-label={`${tile.name}, ${tile.points} points, ${state.complete ? "completed" : multi ? `${state.done} of ${target}` : "not completed"}`}
               // Completed lines glow in a wave: each square starts a little later, from the top-left.
               style={glowing ? { animationDelay: `${(tile.row + tile.col) * 0.15}s` } : undefined}
               className={`relative flex aspect-square flex-col items-center justify-center gap-1 p-1 text-center shadow-[inset_0_0_0_4px] ${
@@ -133,10 +141,10 @@ export function BoardView({
               {multi && !state.complete ? (
                 <span className="flex w-4/5 flex-col items-center gap-0.5">
                   <span className="font-pixel text-pixel text-brass text-shadow-pixel">
-                    {state.done}/{tile.quantity}
+                    {state.done}/{target}
                   </span>
                   <span className="block h-1.5 w-full bg-obsidian" aria-hidden>
-                    <span className="block h-full bg-brass" style={{ width: `${(state.done / tile.quantity) * 100}%` }} />
+                    <span className="block h-full bg-brass" style={{ width: `${(state.done / target) * 100}%` }} />
                   </span>
                 </span>
               ) : (
@@ -213,14 +221,20 @@ function TileDetails({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const remaining = Math.max(0, tile.quantity - state.done);
+  const all = tile.rule === "all";
+  const target = targetOf(tile);
+  const remaining = Math.max(0, target - state.done);
+  // "All" tiles: only the items the team still needs can be added, and one is required.
+  const missing = all ? tile.items.filter((i) => !state.obtainedItemIds.includes(i.id)) : tile.items;
   const choices = members.flatMap((m) =>
     m.rsns.length > 0 ? m.rsns.map((rsn) => ({ value: `${m.userId}|${rsn}`, label: who(m.displayName, rsn) })) : [{ value: `${m.userId}|`, label: m.displayName }],
   );
   const [obtained, setObtained] = useState(choices[0]?.value ?? "");
-  const [itemId, setItemId] = useState(tile.items.length === 1 ? String(tile.items[0]?.id) : "");
+  const [itemId, setItemId] = useState(all || tile.items.length === 1 ? String(missing[0]?.id ?? "") : "");
   const [amount, setAmount] = useState("1");
-  const amountValid = tile.quantity === 1 || (Number(amount) >= 1 && Number(amount) <= remaining);
+  const amountValid = all
+    ? missing.some((i) => String(i.id) === itemId)
+    : tile.quantity === 1 || (Number(amount) >= 1 && Number(amount) <= remaining);
   const [note, setNote] = useState("");
 
   function run(action: () => Promise<{ ok: boolean; error?: string }>, after?: () => void) {
@@ -240,7 +254,7 @@ function TileDetails({
     run(
       () =>
         addDropAction(boardId, team.id, tile.id, {
-          amount: Number(amount),
+          amount: all ? 1 : Number(amount),
           itemId: itemId ? Number(itemId) : null,
           obtainedBy: userId,
           obtainedRsn: rsn || null,
@@ -249,6 +263,8 @@ function TileDetails({
       () => {
         setNote("");
         setAmount("1");
+        // Move to the next item still needed.
+        if (all) setItemId(String(missing.find((i) => String(i.id) !== itemId)?.id ?? ""));
       },
     );
   }
@@ -262,19 +278,31 @@ function TileDetails({
         </button>
       </div>
       <p className="font-pixel text-pixel text-gain text-shadow-pixel">
-        {tile.points} points{tile.quantity > 1 ? ` · needs ${tile.quantity}` : ""}
+        {tile.points} points{all ? ` · needs all ${target}` : tile.quantity > 1 ? ` · needs ${tile.quantity}` : ""}
       </p>
       {tile.description && <p className="text-steel text-shadow-pixel">{tile.description}</p>}
       {tile.items.length > 0 && (
         <div>
-          <p className="text-steel text-shadow-pixel">{tile.items.length > 1 ? "Any of these counts:" : "Item:"}</p>
+          <p className="text-steel text-shadow-pixel">
+            {all ? "All of these are needed:" : tile.items.length > 1 ? "Any of these counts:" : "Item:"}
+          </p>
           <ul className="mt-1 space-y-1">
-            {tile.items.map((item) => (
-              <li key={item.id} className="flex items-center gap-2">
-                <ItemIcon item={item} />
-                <span className="font-pixel text-pixel text-limestone text-shadow-pixel">{item.name}</span>
-              </li>
-            ))}
+            {tile.items.map((item) => {
+              const have = all && team !== null && (state.complete || state.obtainedItemIds.includes(item.id));
+              return (
+                <li key={item.id} className="flex items-center gap-2">
+                  <ItemIcon item={item} />
+                  <span className={`font-pixel text-pixel text-shadow-pixel ${have ? "text-gain" : "text-limestone"}`}>
+                    {item.name}
+                  </span>
+                  {all && team && (
+                    <span className={`ml-auto font-pixel text-pixel text-shadow-pixel ${have ? "text-gain" : "text-steel"}`}>
+                      {have ? "✓" : "needed"}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
@@ -289,8 +317,8 @@ function TileDetails({
             </p>
           ) : (
             <p className="text-steel text-shadow-pixel">
-              {tile.quantity > 1
-                ? `${team.name}: ${state.done}/${tile.quantity}, ${remaining} to go.`
+              {target > 1
+                ? `${team.name}: ${state.done}/${target}, ${remaining} to go.`
                 : `${team.name} hasn't completed this yet.`}
             </p>
           )}
@@ -337,8 +365,8 @@ function TileDetails({
                     <label className="block">
                       <span className="font-pixel text-pixel text-limestone text-shadow-pixel">Which item</span>
                       <select value={itemId} onChange={(e) => setItemId(e.target.value)} className={`mt-1 ${inputClass}`}>
-                        <option value="">Not specified</option>
-                        {tile.items.map((item) => (
+                        {!all && <option value="">Not specified</option>}
+                        {missing.map((item) => (
                           <option key={item.id} value={item.id}>
                             {item.name}
                           </option>
@@ -346,7 +374,7 @@ function TileDetails({
                       </select>
                     </label>
                   )}
-                  {tile.quantity > 1 && (
+                  {!all && tile.quantity > 1 && (
                     <label className="block">
                       <span className="font-pixel text-pixel text-limestone text-shadow-pixel">How many</span>
                       <input
@@ -376,7 +404,15 @@ function TileDetails({
                     onClick={addDrop}
                     className="pixel-btn bg-gain text-obsidian [text-shadow:none] disabled:opacity-60"
                   >
-                    {pending ? "Saving..." : tile.quantity > 1 ? `Add ${amount || 1} for ${team.name}` : `Mark complete for ${team.name}`}
+                    {pending
+                      ? "Saving..."
+                      : all
+                        ? remaining === 1
+                          ? `Mark complete for ${team.name}`
+                          : `Add for ${team.name}`
+                        : tile.quantity > 1
+                          ? `Add ${amount || 1} for ${team.name}`
+                          : `Mark complete for ${team.name}`}
                   </button>
                 </>
               )}

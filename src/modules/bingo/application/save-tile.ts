@@ -19,6 +19,9 @@ export class SaveTile {
       await this.tiles.save(boardId, {
         ...input,
         name: input.name.trim(),
+        // "All" tiles need each item once, so their quantity is always 1.
+        quantity: input.rule === "all" ? 1 : input.quantity,
+        itemIds: input.rule === "all" ? [...new Set(input.itemIds)] : input.itemIds,
         description: input.description?.trim() || null,
         iconItemId: input.iconItemId ?? input.itemIds[0] ?? null,
       }),

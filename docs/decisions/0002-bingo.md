@@ -15,7 +15,7 @@ Admins need to build boards from real OSRS items with their icons, including unt
 ### Bingo MVP (v0.3)
 
 - **Board:** title, rules text, square grid from 3×3 to 7×7 (default 5×5), start and end time; status draft → live → finished. Admins (Officer and above) create and manage boards; members never see drafts.
-- **Tile:** a position on the grid with a name, points, optional quantity ("x3") and description. It's completed by **any one of its items**, or it's a **text-only goal** (an item can still be picked just for its icon).
+- **Tile:** a position on the grid with a name, points, optional quantity ("x3") and description. Its items count in one of two ways (the tile's rule): **any of them** toward the quantity (the default), or **all of them**, each needed once (e.g. both crowns for a Twinflame; progress counts the distinct items). A tile with no items is a **text-only goal** (an item can still be picked just for its icon).
 - **Team:** named, with members chosen only from site members with linked clan accounts; one team per member per board.
 - **Completion:** a team completes a tile once. In the MVP, admins mark tiles (from screenshots posted in Discord), with an optional note.
 - **Score:** the sum of a team's completed tiles. Every signed-in member sees every team's board and the scoreboard.

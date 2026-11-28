@@ -94,6 +94,7 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
             name: t.name,
             points: t.points,
             quantity: t.quantity,
+            rule: t.rule,
             description: t.description,
             iconItemId: t.iconItemId,
             itemIds: t.itemIds,

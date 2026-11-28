@@ -57,6 +57,13 @@
       "when": 1795806955309,
       "tag": "0007_team_captains",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795819285389,
+      "tag": "0008_tile_rule",
+      "breakpoints": true
     }
   ]
 }

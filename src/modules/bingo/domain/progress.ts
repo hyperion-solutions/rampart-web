@@ -1,4 +1,5 @@
 import type { CompletionSource } from "./completion";
+import { type Tile, tileTarget } from "./tile";
 
 /** One addition toward a tile for a team: who got it, who added it, how many. */
 export interface ProgressEntry {
@@ -23,9 +24,21 @@ export type NewProgressEntry = Pick<
   "teamId" | "tileId" | "amount" | "itemId" | "obtainedBy" | "obtainedRsn" | "source" | "note"
 > & { readonly addedBy: string | null };
 
-/** How far a team is on a tile. Completed tiles count as full even if added before progress existed. */
-export function tileProgress(quantity: number, entries: readonly { amount: number }[], completed: boolean) {
-  const counted = Math.min(quantity, entries.reduce((sum, e) => sum + e.amount, 0));
-  const done = completed ? quantity : counted;
-  return { done, quantity, remaining: Math.max(0, quantity - done), complete: completed || done >= quantity };
+/**
+ * How far a team is on a tile. For "any" tiles every drop counts toward the quantity; for "all"
+ * tiles each listed item counts once. Completed tiles count as full even if marked before progress existed.
+ */
+export function tileProgress(
+  tile: Pick<Tile, "rule" | "quantity" | "itemIds">,
+  entries: readonly { readonly amount: number; readonly itemId: number | null }[],
+  completed: boolean,
+) {
+  const target = tileTarget(tile);
+  const obtainedItemIds =
+    tile.rule === "all"
+      ? [...new Set(entries.flatMap((e) => (e.itemId !== null && tile.itemIds.includes(e.itemId) ? [e.itemId] : [])))]
+      : [];
+  const counted = tile.rule === "all" ? obtainedItemIds.length : entries.reduce((sum, e) => sum + e.amount, 0);
+  const done = completed ? target : Math.min(target, counted);
+  return { done, target, remaining: Math.max(0, target - done), complete: completed || done >= target, obtainedItemIds };
 }

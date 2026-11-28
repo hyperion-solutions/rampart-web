@@ -66,6 +66,7 @@ export async function saveTileAction(boardId: string, input: TileInput): Promise
     typeof input.name === "string" &&
     isInt(input.points) &&
     isInt(input.quantity) &&
+    (input.rule === "any" || input.rule === "all") &&
     (input.description === null || typeof input.description === "string") &&
     (input.iconItemId === null || isInt(input.iconItemId)) &&
     Array.isArray(input.itemIds) &&
@@ -78,6 +79,7 @@ export async function saveTileAction(boardId: string, input: TileInput): Promise
     name: input.name,
     points: input.points,
     quantity: input.quantity,
+    rule: input.rule,
     description: input.description,
     iconItemId: input.iconItemId,
     itemIds: input.itemIds,

@@ -62,6 +62,8 @@ export const bingoTiles = pgTable(
     name: text("name").notNull(),
     points: integer("points").notNull().default(0),
     quantity: integer("quantity").notNull().default(1),
+    /** "any": any of the items count toward the quantity; "all": each item is needed once. */
+    rule: text("rule").notNull().default("any"),
     description: text("description"),
     /** Item shown on the tile; for text-only tiles it's just the picture. */
     iconItemId: integer("icon_item_id"),
@@ -70,10 +72,11 @@ export const bingoTiles = pgTable(
     unique("bingo_tiles_position").on(t.boardId, t.row, t.col),
     check("bingo_tiles_points", sql`${t.points} >= 0`),
     check("bingo_tiles_quantity", sql`${t.quantity} >= 1`),
+    check("bingo_tiles_rule", sql`${t.rule} in ('any', 'all')`),
   ],
 );
 
-/** Items that complete a tile: any one of them. Item ids from the items catalog. */
+/** Items that complete a tile (any or all of them, per the tile's rule). Item ids from the items catalog. */
 export const bingoTileItems = pgTable(
   "bingo_tile_items",
   {
