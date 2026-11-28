@@ -30,7 +30,12 @@ interface Saved {
   readonly step: Step;
   /** The attempt already on record when the member started waiting: a different one means they logged in. */
   readonly seenAt: string | null;
+  /** When the step was saved (ms). Steps are only kept for switching to the game and back. */
+  readonly savedAt?: number;
 }
+
+/** A saved step older than this is forgotten: a later visit starts from the greeting. */
+const SAVED_STEP_MAX_AGE_MS = 30 * 60_000;
 
 const STORAGE_KEY = "rampart:link-wizard";
 
@@ -40,6 +45,8 @@ function load(): Saved | null {
     if (!raw) return null;
     const saved = JSON.parse(raw) as Partial<Saved>;
     const steps: readonly Step[] = ["intro", ...DINK_STEPS, "result", "manual"];
+    // Old saves (or ones from before savedAt existed) are stale: start from the greeting.
+    if (!saved.savedAt || Date.now() - saved.savedAt > SAVED_STEP_MAX_AGE_MS) return null;
     return saved.step && steps.includes(saved.step) ? { step: saved.step, seenAt: saved.seenAt ?? null } : null;
   } catch {
     return null;
@@ -80,7 +87,7 @@ export function LinkWizard({
   }, []);
 
   const go = useCallback((next: Step, nextSeenAt: string | null = null) => {
-    const value = { step: next, seenAt: nextSeenAt };
+    const value: Saved = { step: next, seenAt: nextSeenAt, savedAt: Date.now() };
     setSaved(value);
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
@@ -103,6 +110,15 @@ export function LinkWizard({
 
   return (
     <div className="space-y-3">
+      {/* Whatever step the guide is on, it never looks like it forgot the member's accounts. */}
+      {step !== "intro" && linkedRsns.length > 0 && (
+        <p className="text-steel text-shadow-pixel">
+          Linked: <span className="font-pixel text-pixel text-gain">{listNames(linkedRsns)}</span> ·{" "}
+          <button type="button" onClick={() => go("intro")} className="font-pixel text-pixel text-lightning hover:text-limestone">
+            Start over
+          </button>
+        </p>
+      )}
       {dinkIndex >= 0 && (
         <p className="font-pixel text-pixel text-steel text-shadow-pixel">
           Step {dinkIndex + 1} of {DINK_STEPS.length}
@@ -179,8 +195,17 @@ export function LinkWizard({
             </>
           }
         >
-          <p>Now make your personal link. Dink sends your logins to it.</p>
-          <p>Copy it straight away: I can only show it once, and anyone who has it can link accounts to you.</p>
+          {hasLink && !newUrl ? (
+            <>
+              <p>You already have a link. If it&apos;s in Dink, skip ahead: the same link works for all your accounts.</p>
+              <p>Only make a new one if you lost it or think someone else has it. The old one stops working.</p>
+            </>
+          ) : (
+            <>
+              <p>Now make your personal link. Dink sends your logins to it.</p>
+              <p>Copy it straight away: I can only show it once, and anyone who has it can link accounts to you.</p>
+            </>
+          )}
           <div className="pt-2">
             <CreateLinkForm hasLink={hasLink} onCreated={onCreated} />
           </div>
