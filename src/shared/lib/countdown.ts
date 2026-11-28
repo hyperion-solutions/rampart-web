@@ -31,12 +31,12 @@ export function describeCountdown(
   const toStart = startsAt.getTime() - now.getTime();
   const toEnd = endsAt.getTime() - now.getTime();
 
-  if (status === "finished" || toEnd <= 0) {
-    return { text: `Ended ${span(Math.max(MINUTE, -toEnd))} ago`, tone: "over" };
-  }
+  // Finished boards may have been finished before their end date: no "ended … ago" for them.
+  if (status === "finished") return { text: "Finished · results are final", tone: "over" };
   if (status === "draft") {
     return { text: toStart > 0 ? `Draft · starts in ${span(toStart)}` : "Draft · not published", tone: "draft" };
   }
+  if (toEnd <= 0) return { text: `Ended ${span(Math.max(MINUTE, -toEnd))} ago · results being checked`, tone: "over" };
   if (toStart > 0) return { text: `Starts in ${span(toStart)}`, tone: "upcoming" };
 
   if (toEnd <= HOUR) return { text: `Final hour · ${plural(Math.ceil(toEnd / MINUTE), "minute")} remain`, tone: "urgent" };

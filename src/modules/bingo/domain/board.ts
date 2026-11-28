@@ -43,6 +43,18 @@ export function validateBoardDetails(d: BoardDetails): string | null {
   return null;
 }
 
+/** Past its end date. A live board stays open to admins for late screenshots until it's finished. */
+export const hasEnded = (board: Pick<Board, "endsAt">, now: Date = new Date()) => board.endsAt <= now;
+
+/** Live boards are finished automatically this long after their end (daily job), so results become final. */
+export const AUTO_FINISH_AFTER_HOURS = 48;
+
+/** Whether a live board is due to be finished automatically. */
+export const dueToFinish = (board: Pick<Board, "status" | "endsAt">, now: Date = new Date()) =>
+  board.status === "live" && now.getTime() - board.endsAt.getTime() >= AUTO_FINISH_AFTER_HOURS * 3_600_000;
+
+export const ENDED_ADMINS_ONLY = "This board has ended. Only admins can add or undo the last drops now.";
+
 /**
  * A board's squares and scoring are fixed once it's live and its start time has passed (and when
  * finished): changing a square mid-event would keep its completions on a different item, and

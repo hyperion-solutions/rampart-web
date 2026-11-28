@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { container } from "@/composition/container";
 import { requireAdmin } from "@/composition/require-admin";
-import { BACK_TO_DRAFT_BLOCKED, canGoBackToDraft, isLocked, lockedReason } from "@/modules/bingo/domain/board";
+import { BACK_TO_DRAFT_BLOCKED, canGoBackToDraft, hasEnded, isLocked, lockedReason } from "@/modules/bingo/domain/board";
 import { formatDateTime } from "@/shared/lib/format";
 import { SectionHeading } from "@/shared/ui/section-heading";
 import { changeBoardStatusAction, updateBoardAction } from "../actions";
@@ -96,6 +96,13 @@ export default async function AdminBoardPage({ params }: { params: Promise<{ boa
           size={board.size}
           readOnly={locked}
           readOnlyReason={locked ? lockedReason(board) : undefined}
+          boardLinkLabel={
+            board.status === "finished"
+              ? "Open the board to see the results"
+              : hasEnded(board)
+                ? "Open the board to add the last drops"
+                : "Open the live board to add or undo drops"
+          }
           items={items}
           tiles={tiles.map((t) => ({
             row: t.row,

@@ -36,6 +36,7 @@ export function BoardEditor({
   items,
   readOnly,
   readOnlyReason,
+  boardLinkLabel = "Open the board",
 }: {
   boardId: string;
   size: number;
@@ -44,6 +45,8 @@ export function BoardEditor({
   readOnly: boolean;
   /** Shown instead of editing hints when `readOnly`. */
   readOnlyReason?: string;
+  /** Link text to the member board when `readOnly`, e.g. "Open the board to see the results". */
+  boardLinkLabel?: string;
 }) {
   const [selected, setSelected] = useState<{ row: number; col: number } | null>(null);
   const byPosition = new Map(tiles.map((t) => [`${t.row}:${t.col}`, t]));
@@ -127,6 +130,7 @@ export function BoardEditor({
             tile={current}
             items={items}
             reason={readOnlyReason}
+            linkLabel={boardLinkLabel}
             onClose={() => setSelected(null)}
           />
         ) : selected ? (
@@ -150,7 +154,7 @@ export function BoardEditor({
                 ? `${readOnlyReason ?? "These squares can't change."} Click a square to see what it needs.`
                 : "Click a square to fill it. With the keyboard: Tab or the arrow keys move between squares, Enter edits one, Esc goes back."}
             </p>
-            {readOnly && <LiveBoardLink boardId={boardId} />}
+            {readOnly && <LiveBoardLink boardId={boardId} label={boardLinkLabel} />}
           </div>
         )}
       </div>
@@ -158,11 +162,11 @@ export function BoardEditor({
   );
 }
 
-/** Where drops are added and undone once a board has started. */
-function LiveBoardLink({ boardId }: { boardId: string }) {
+/** Where drops are added and undone once a board has started, or its results are seen. */
+function LiveBoardLink({ boardId, label }: { boardId: string; label: string }) {
   return (
     <Link href={`/bingo/${boardId}`} className="inline-block font-pixel text-pixel text-lightning text-shadow-pixel hover:text-limestone">
-      Open the live board to add or undo drops
+      {label}
     </Link>
   );
 }
@@ -175,6 +179,7 @@ function TileSummary({
   tile,
   items,
   reason,
+  linkLabel,
   onClose,
 }: {
   boardId: string;
@@ -183,6 +188,7 @@ function TileSummary({
   tile: EditorTile | undefined;
   items: ItemsById;
   reason: string | undefined;
+  linkLabel: string;
   onClose: () => void;
 }) {
   const listed = (tile?.itemIds ?? []).flatMap((id) => (items[id] ? [items[id]] : []));
@@ -231,7 +237,7 @@ function TileSummary({
 
       <div className="space-y-2 border-t-4 border-obsidian pt-3">
         <p className="text-steel text-shadow-pixel">{reason ?? "These squares can't change."}</p>
-        <LiveBoardLink boardId={boardId} />
+        <LiveBoardLink boardId={boardId} label={linkLabel} />
       </div>
     </div>
   );

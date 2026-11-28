@@ -1,3 +1,4 @@
+import { ENDED_ADMINS_ONLY, hasEnded } from "../domain/board";
 import { tileProgress } from "../domain/progress";
 import type { PlayerDirectory } from "../domain/player-directory";
 import type {
@@ -54,6 +55,8 @@ export class AddTileProgress {
     // Nothing counts before the start. After the end, admins can still catch up on late
     // screenshots until they finish the board; Dink (#32) only counts drops inside the window.
     if (now < board.startsAt) return fail("This board hasn't started yet. Drops can be added once it begins.");
+    // After the end, only admins catch up on late screenshots (captains and Dink stop at the end).
+    if (hasEnded(board, now) && input.actor && !input.actor.isAdmin) return fail(ENDED_ADMINS_ONLY);
 
     const [tiles, teams, members] = await Promise.all([
       this.tiles.listForBoard(input.boardId),
@@ -132,10 +135,14 @@ export class UndoLastProgress {
     private readonly completions: CompletionRepository,
   ) {}
 
-  async execute(input: { boardId: string; teamId: string; tileId: string; actor: Actor }): Promise<Result<null>> {
+  async execute(
+    input: { boardId: string; teamId: string; tileId: string; actor: Actor },
+    now: Date = new Date(),
+  ): Promise<Result<null>> {
     const board = await this.boards.findById(input.boardId);
     if (!board) return fail("That board doesn't exist.");
     if (board.status !== "live") return fail("Drops can only be changed while the board is live.");
+    if (hasEnded(board, now) && !input.actor.isAdmin) return fail(ENDED_ADMINS_ONLY);
     const team = (await this.teams.listForBoard(input.boardId)).find((t) => t.id === input.teamId);
     if (!team) return fail("That team isn't on this board.");
     if (!canEditTeamProgress(input.actor, team)) return fail("Only admins and this team's captain can undo drops.");

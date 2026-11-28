@@ -20,6 +20,7 @@ import { ListTrackedItemIds } from "@/modules/bingo/application/list-tracked-ite
 import { RecordDinkDrops } from "@/modules/bingo/application/record-dink-drops";
 import { VercelBlobScreenshotStore } from "@/modules/bingo/infrastructure/screenshots/vercel-blob-screenshot-store";
 import { CleanUpScreenshots } from "@/modules/bingo/application/clean-up-screenshots";
+import { FinishEndedBoards } from "@/modules/bingo/application/finish-ended-boards";
 import { DrizzleScreenshotIndex } from "@/modules/bingo/infrastructure/db/drizzle-screenshot-index";
 import { GetBoardVersion } from "@/modules/bingo/application/get-board-version";
 import { DrizzleBoardActivity } from "@/modules/bingo/infrastructure/db/drizzle-board-activity";
@@ -133,6 +134,7 @@ export function createContainer() {
     bingo: {
       createBoard: new CreateBoard(bingoBoards),
       updateBoard: new UpdateBoard(bingoBoards, bingoTiles),
+      finishEndedBoards: new FinishEndedBoards(bingoBoards),
       changeBoardStatus: new ChangeBoardStatus(bingoBoards, bingoProgress, bingoCompletions),
       listBoards: new ListBoards(bingoBoards),
       listTrackedItemIds: new ListTrackedItemIds(bingoBoards, bingoTiles),
